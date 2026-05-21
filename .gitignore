@@ -1,0 +1,14 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Local database / data files
+thuc_pham_thuong_an.json
+lich_su_an_uong*.json
+muc_tieu_*.json
+

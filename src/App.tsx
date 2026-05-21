@@ -550,7 +550,7 @@ export default function App() {
                   Cá nhân hóa Dinh dưỡng & Thể hình
                 </span>
                 <h1 className="text-2xl sm:text-3.5xl font-extrabold tracking-tight text-white mt-0.5">
-                  Tính Dinh Dưỡng & Gợi Ý Công Thức
+                  Tính Calo
                 </h1>
                 <p className="text-sm text-emerald-100/90 font-medium mt-1">
                   Tính toán hàm lượng Calories & Macros lập tức, lưu trữ thông minh và đề xuất tỷ lệ dinh dưỡng chuẩn xác

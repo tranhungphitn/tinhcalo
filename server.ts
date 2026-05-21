@@ -8,6 +8,9 @@ import { createServer as createViteServer } from "vite";
 // Load environment variables
 dotenv.config();
 
+const isVercel = process.env.VERCEL === "1";
+const dataDir = isVercel ? "/tmp" : process.cwd();
+
 const app = express();
 const PORT = Number(process.env.PORT) || 4122;
 
@@ -35,7 +38,7 @@ function getGeminiClient(): GoogleGenAI {
 }
 
 // Path to store custom foods JSON file
-const CUSTOM_FOODS_FILE_PATH = path.join(process.cwd(), "thuc_pham_thuong_an.json");
+const CUSTOM_FOODS_FILE_PATH = path.join(dataDir, "thuc_pham_thuong_an.json");
 
 // Helper function to seed initial custom foods if file doesn't exist
 function getInitialSeededCustomFoods(): any[] {
@@ -216,7 +219,7 @@ function getInitialSeededMeals(): any[] {
 function readMealsFromFile(username: string): any[] {
   try {
     const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
-    const filePath = path.join(process.cwd(), `lich_su_an_uong_${safeUsername}.json`);
+    const filePath = path.join(dataDir, `lich_su_an_uong_${safeUsername}.json`);
     if (fs.existsSync(filePath)) {
       const fileData = fs.readFileSync(filePath, "utf-8");
       return JSON.parse(fileData);
@@ -263,7 +266,7 @@ app.post("/api/meals", (req, res) => {
 function readGoalFromFile(username: string): any {
   try {
     const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
-    const filePath = path.join(process.cwd(), `muc_tieu_${safeUsername}.json`);
+    const filePath = path.join(dataDir, `muc_tieu_${safeUsername}.json`);
     if (fs.existsSync(filePath)) {
       const fileData = fs.readFileSync(filePath, "utf-8");
       return JSON.parse(fileData);
@@ -307,27 +310,31 @@ app.post("/api/goal", (req, res) => {
   }
 });
 
-// Setup Vite & Static Assets routing
-async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
-    console.log("Starting server in development mode with Vite middleware...");
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    console.log("Starting server in production mode...");
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+export default app;
+
+// Setup Vite & Static Assets routing (only when not running on Vercel)
+if (!isVercel) {
+  async function startServer() {
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Starting server in development mode with Vite middleware...");
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: "spa",
+      });
+      app.use(vite.middlewares);
+    } else {
+      console.log("Starting server in production mode...");
+      const distPath = path.join(process.cwd(), "dist");
+      app.use(express.static(distPath));
+      app.get("*", (req, res) => {
+        res.sendFile(path.join(distPath, "index.html"));
+      });
+    }
+
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server fully started on port ${PORT}`);
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server fully started on port ${PORT}`);
-  });
+  startServer();
 }
-
-startServer();

@@ -225,10 +225,10 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
 
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] font-bold text-slate-500 block mb-1 uppercase tracking-wider">Tên thực phẩm / món ăn *</label>
+                <label className="text-[10px] font-bold text-slate-500 block mb-1 uppercase tracking-wider">Tên thực phẩm *</label>
                 <input
                   type="text"
-                  placeholder="Ví dụ: Bún bò huế thăn heo, Sữa chua nếp cẩm..."
+                  placeholder="Ví dụ: Bún bò huế thăn heo, Sữa chua..."
                   className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-emerald-400/20 font-medium transition-all"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -241,7 +241,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                   <label className="text-[10px] font-bold text-slate-500 block mb-1 uppercase tracking-wider">Khẩu phần *</label>
                   <input
                     type="text"
-                    placeholder="Ví dụ: 100g, 1 bát lớn, 1 quả"
+                    placeholder="Ví dụ: 100g, 1 bát"
                     className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-emerald-400/20 font-medium transition-all"
                     value={servingSize}
                     onChange={(e) => setServingSize(e.target.value)}
@@ -250,7 +250,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-amber-600 block mb-1 uppercase tracking-wider">Lượng Calo (kcal)</label>
+                  <label className="text-[10px] font-bold text-amber-600 block mb-1 uppercase tracking-wider">🔥 Calo (kcal)</label>
                   <input
                     type="number"
                     placeholder="Ví dụ: 130"
@@ -264,7 +264,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-[10px] font-bold text-emerald-600 block mb-1 uppercase tracking-wider">🥩 Đạm (Protein)</label>
+                  <label className="text-[10px] font-bold text-emerald-600 block mb-1 uppercase tracking-wider">🥩 Đạm (g)</label>
                   <input
                     type="number"
                     step="0.1"
@@ -277,7 +277,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-sky-600 block mb-1 uppercase tracking-wider">🍚 Tinh bột (Carb)</label>
+                  <label className="text-[10px] font-bold text-sky-600 block mb-1 uppercase tracking-wider">🍚 Carb (g)</label>
                   <input
                     type="number"
                     step="0.1"
@@ -290,7 +290,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-rose-500 block mb-1 uppercase tracking-wider">🧈 Chất béo (Fat)</label>
+                  <label className="text-[10px] font-bold text-rose-500 block mb-1 uppercase tracking-wider">🧈 Béo (g)</label>
                   <input
                     type="number"
                     step="0.1"

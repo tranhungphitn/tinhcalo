@@ -502,7 +502,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             {/* Fat count */}
             <div>
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-rose-500 font-bold">
-                🧈 Fat (g)
+                🧈 Béo (g)
               </label>
               <input
                 type="number"

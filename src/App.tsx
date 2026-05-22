@@ -31,7 +31,9 @@ import {
   LogIn,
   Smartphone,
   Share,
-  MoreVertical
+  MoreVertical,
+  User,
+  Lock
 } from "lucide-react";
 
 export default function App() {
@@ -495,15 +497,15 @@ export default function App() {
     return (
       <div className="min-h-screen w-full bg-[url('/login_background.png')] bg-cover bg-center flex items-center justify-center p-4 relative overflow-hidden font-sans">
         {/* Soft overlay to make text highly readable */}
-        <div className="absolute inset-0 bg-white/25 backdrop-blur-[3px] z-0"></div>
+        <div className="absolute inset-0 bg-white/20 backdrop-blur-[4px] z-0"></div>
         
         {/* Decorative bright lights */}
-        <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-400/20 rounded-full blur-3xl z-0 pointer-events-none"></div>
-        <div className="absolute bottom-10 right-10 w-80 h-80 bg-teal-400/20 rounded-full blur-3xl z-0 pointer-events-none"></div>
+        <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-400/25 rounded-full blur-3xl z-0 pointer-events-none animate-pulse"></div>
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-teal-400/25 rounded-full blur-3xl z-0 pointer-events-none animate-pulse"></div>
         
-        <div className="bg-white/90 backdrop-blur-xl rounded-[32px] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-white/60 w-full max-w-md relative z-10 animate-fade-in text-slate-800">
+        <div className="bg-white/85 backdrop-blur-2xl rounded-3xl p-8 md:p-10 shadow-[0_25px_60px_rgba(0,0,0,0.18)] border border-white/50 w-full max-w-md relative z-10 animate-fade-in text-slate-800">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-teal-500 text-white rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/25">
+            <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-teal-500 text-white rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30 transform hover:rotate-6 transition-transform">
               <ChefHat className="w-9 h-9 text-white" />
             </div>
             <h1 className="text-2xl font-black text-slate-900 tracking-tight bg-gradient-to-r from-emerald-600 to-teal-700 bg-clip-text text-transparent">Nhật Ký Dinh Dưỡng</h1>
@@ -517,38 +519,48 @@ export default function App() {
             </div>
           )}
 
-          <form onSubmit={handleLoginSubmit} className="space-y-4.5">
+          <form onSubmit={handleLoginSubmit} className="space-y-5">
             <div>
-              <label className="text-[10px] font-extrabold text-slate-400 block mb-1.5 uppercase tracking-wider">Tên đăng nhập (phi / tuyen)</label>
-              <input
-                type="text"
-                placeholder="Nhập 'phi' hoặc 'tuyen'"
-                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-2xl px-4 py-3 text-xs text-slate-750 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-emerald-400/20 font-bold transition-all text-center lowercase"
-                value={loginUsername}
-                onChange={(e) => setLoginUsername(e.target.value)}
-                required
-              />
+              <label className="text-[11px] font-extrabold text-slate-500 block mb-1.5 uppercase tracking-wider">
+                Tên đăng nhập
+              </label>
+              <div className="relative">
+                <User className="w-4.5 h-4.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Nhập tên đăng nhập (ví dụ: phi)"
+                  className="w-full bg-slate-50/70 border border-slate-200 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-400/10 rounded-2xl pl-11 pr-4 py-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden font-bold transition-all duration-200 lowercase"
+                  value={loginUsername}
+                  onChange={(e) => setLoginUsername(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-extrabold text-slate-400 block mb-1.5 uppercase tracking-wider">Mật khẩu</label>
-              <input
-                type="password"
-                placeholder="••••••"
-                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-2xl px-4 py-3 text-xs text-slate-750 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-emerald-400/20 font-bold transition-all text-center tracking-widest text-slate-800"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                required
-              />
+              <label className="text-[11px] font-extrabold text-slate-500 block mb-1.5 uppercase tracking-wider">
+                Mật khẩu
+              </label>
+              <div className="relative">
+                <Lock className="w-4.5 h-4.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="password"
+                  placeholder="Nhập mật khẩu (ví dụ: 123)"
+                  className="w-full bg-slate-50/70 border border-slate-200 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-400/10 rounded-2xl pl-11 pr-4 py-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden font-bold transition-all duration-200"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
             <div className="flex items-center justify-start py-1">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
+              <label className="flex items-center gap-2.5 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded-sm border-slate-350 text-emerald-600 focus:ring-emerald-500/30 w-3.5 h-3.5 cursor-pointer accent-emerald-500"
+                  className="rounded-sm border-slate-300 text-emerald-600 focus:ring-emerald-500/20 w-4 h-4 cursor-pointer accent-emerald-500"
                 />
                 <span className="text-[11px] font-bold text-slate-500">Ghi nhớ mật khẩu & tự động đăng nhập</span>
               </label>
@@ -557,7 +569,7 @@ export default function App() {
             <button
               type="submit"
               disabled={isLoggingIn}
-              className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-extrabold py-3.5 rounded-2xl transition-all shadow-md active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-extrabold py-3.5 rounded-2xl transition-all shadow-md hover:shadow-lg active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 mt-2"
             >
               {isLoggingIn ? (
                 <span>Đang kết nối...</span>
@@ -569,36 +581,6 @@ export default function App() {
               )}
             </button>
           </form>
-
-          {/* Quick Click helper badges to make testing a breeze! */}
-          <div className="mt-8 pt-6 border-t border-slate-150">
-            <p className="text-[10px] font-bold text-slate-400 uppercase text-center tracking-wider mb-3">Ấn nhanh để thử nghiệm nhanh</p>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setLoginUsername("phi");
-                  setLoginPassword("123");
-                }}
-                className="p-2.5 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-250 border border-slate-100 rounded-xl transition-all text-center cursor-pointer block text-left"
-              >
-                <p className="text-xs font-bold text-slate-800 leading-none">phi (Admin)</p>
-                <p className="text-[9px] text-slate-400 mt-1 uppercase">Quản lý thực phẩm</p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setLoginUsername("tuyen");
-                  setLoginPassword("123");
-                }}
-                className="p-2.5 bg-slate-50 hover:bg-teal-50 hover:border-teal-250 border border-slate-100 rounded-xl transition-all text-center cursor-pointer block text-left"
-              >
-                <p className="text-xs font-bold text-slate-800 leading-none">tuyen (User)</p>
-                <p className="text-[9px] text-slate-400 mt-1 uppercase">Dùng chung dữ liệu</p>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     );

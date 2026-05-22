@@ -170,7 +170,7 @@ export default function App() {
     fetchMeals();
 
     const fetchCustomFoods = async () => {
-      const localCustomKey = "macro_tracker_custom_foods";
+      const localCustomKey = `macro_tracker_custom_foods_${currentUser.username}`;
       const localCustomStr = localStorage.getItem(localCustomKey);
       let localCustomList: CustomFood[] = [];
       if (localCustomStr) {
@@ -185,7 +185,9 @@ export default function App() {
       }
 
       try {
-        const res = await fetch("/api/custom-foods");
+        const res = await fetch("/api/custom-foods", {
+          headers: { "x-username": currentUser.username }
+        });
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
@@ -194,8 +196,8 @@ export default function App() {
             if (!isDefaultSeeded || localCustomList.length === 0) {
               setCustomFoods(data);
               localStorage.setItem(localCustomKey, JSON.stringify(data));
-            } else if (localCustomList.length > 0 && currentUser.role === "admin") {
-              // Server bị reset về default, đồng bộ ngược từ local lên server (chỉ admin được phép)
+            } else if (localCustomList.length > 0) {
+              // Server bị reset về default, đồng bộ ngược từ local lên server (tất cả user đều có quyền)
               await fetch("/api/custom-foods", {
                 method: "POST",
                 headers: { 
@@ -268,12 +270,7 @@ export default function App() {
     fetchUserGoal();
   }, [currentUser]);
 
-  // Handle redirecting away from customFoods tab if logged in as 'tuyen'
-  useEffect(() => {
-    if (currentUser?.username === "tuyen" && activeMainTab === "customFoods") {
-      setActiveMainTab("nutrition");
-    }
-  }, [currentUser, activeMainTab]);
+
 
   // Handle Login submission
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -324,6 +321,9 @@ export default function App() {
     localStorage.removeItem("macro_tracker_user");
     sessionStorage.removeItem("macro_tracker_user");
     setCurrentUser(null);
+    setMeals([]);
+    setCustomFoods([]);
+    setDailyGoal(DEFAULT_GOAL);
     if (!rememberMe) {
       setLoginUsername("");
       setLoginPassword("");
@@ -386,7 +386,7 @@ export default function App() {
     if (!currentUser) return;
 
     // Save to localStorage immediately for instant local persistence
-    const localCustomKey = "macro_tracker_custom_foods";
+    const localCustomKey = `macro_tracker_custom_foods_${currentUser.username}`;
     localStorage.setItem(localCustomKey, JSON.stringify(updatedFoods));
 
     try {
@@ -792,7 +792,7 @@ export default function App() {
             <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Nhật ký Ăn Uống</span>
           </button>
-          {currentUser?.username !== "tuyen" && (
+          {currentUser && (
             <button
               onClick={() => setActiveMainTab("customFoods")}
               className={`flex items-center gap-1.5 px-3 sm:px-5 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold rounded-xl transition-all cursor-pointer ${
@@ -1243,7 +1243,7 @@ export default function App() {
           <CustomFoodsManager 
             customFoods={customFoods} 
             onUpdateCustomFoods={handleUpdateCustomFoods} 
-            isAdmin={currentUser?.role === "admin"} 
+            isAdmin={true} 
           />
         )}
       </main>

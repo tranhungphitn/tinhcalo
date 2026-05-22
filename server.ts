@@ -51,19 +51,32 @@ function getInitialSeededCustomFoods(): any[] {
   ];
 }
 
-// Read custom foods from JSON file
-function readCustomFoodsFromFile(): any[] {
+// Read custom foods from JSON file specific to a user
+function readCustomFoodsFromFile(username: string): any[] {
   try {
-    if (fs.existsSync(CUSTOM_FOODS_FILE_PATH)) {
-      const fileData = fs.readFileSync(CUSTOM_FOODS_FILE_PATH, "utf-8");
+    const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
+    const filePath = path.join(dataDir, `thuc_pham_thuong_an_${safeUsername}.json`);
+    if (fs.existsSync(filePath)) {
+      const fileData = fs.readFileSync(filePath, "utf-8");
       return JSON.parse(fileData);
     } else {
-      const defaultFoods = getInitialSeededCustomFoods();
-      fs.writeFileSync(CUSTOM_FOODS_FILE_PATH, JSON.stringify(defaultFoods, null, 2), "utf-8");
+      // Seed dynamically: if global default file exists, copy it, otherwise seed from helper
+      let defaultFoods: any[] = [];
+      if (fs.existsSync(CUSTOM_FOODS_FILE_PATH)) {
+        try {
+          const globalData = fs.readFileSync(CUSTOM_FOODS_FILE_PATH, "utf-8");
+          defaultFoods = JSON.parse(globalData);
+        } catch (e) {
+          defaultFoods = getInitialSeededCustomFoods();
+        }
+      } else {
+        defaultFoods = getInitialSeededCustomFoods();
+      }
+      fs.writeFileSync(filePath, JSON.stringify(defaultFoods, null, 2), "utf-8");
       return defaultFoods;
     }
   } catch (err) {
-    console.error("Lỗi khi đọc file thuc_pham_thuong_an.json:", err);
+    console.error(`Lỗi khi đọc file thuc_pham_thuong_an_${username}.json:`, err);
     return getInitialSeededCustomFoods();
   }
 }
@@ -76,7 +89,8 @@ app.post("/api/macros/extract", async (req, res) => {
       return res.status(400).json({ error: "Vui lòng nhập mô tả món ăn." });
     }
 
-    const customFoods = readCustomFoodsFromFile();
+    const username = (req.headers["x-username"] as string) || "default";
+    const customFoods = readCustomFoodsFromFile(username);
     const ai = getGeminiClient();
 
     let customFoodsPromptPart = "";
@@ -157,7 +171,8 @@ Nhiệm vụ đặc biệt quan trọng (ƯU TIÊN TUYỆT ĐỐI SỐ 1 - TRONG
 // Endpoint: Lấy danh sách Dữ liệu Thức Ăn cá nhân
 app.get("/api/custom-foods", (req, res) => {
   try {
-    const list = readCustomFoodsFromFile();
+    const username = (req.headers["x-username"] as string) || "default";
+    const list = readCustomFoodsFromFile(username);
     return res.json(list);
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Không thể đọc danh sách thực phẩm cá nhân." });
@@ -168,17 +183,16 @@ app.get("/api/custom-foods", (req, res) => {
 app.post("/api/custom-foods", (req, res) => {
   try {
     const username = (req.headers["x-username"] as string) || "default";
-    if (username.toLowerCase().trim() !== "phi") {
-      return res.status(403).json({ error: "Chỉ tài khoản quản trị phi mới có quyền chỉnh sửa mục này." });
-    }
     const { customFoods } = req.body;
     if (!Array.isArray(customFoods)) {
       return res.status(400).json({ error: "Dữ liệu gửi lên phải là một danh sách dữ liệu thức ăn." });
     }
-    fs.writeFileSync(CUSTOM_FOODS_FILE_PATH, JSON.stringify(customFoods, null, 2), "utf-8");
+    const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
+    const filePath = path.join(dataDir, `thuc_pham_thuong_an_${safeUsername}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(customFoods, null, 2), "utf-8");
     return res.json({ success: true, count: customFoods.length });
   } catch (error: any) {
-    console.error("Lỗi khi ghi file thuc_pham_thuong_an.json:", error);
+    console.error(`Lỗi khi ghi file thuc_pham_thuong_an_${username}.json:`, error);
     return res.status(500).json({ error: error.message || "Không thể lưu danh sách dữ liệu thức ăn." });
   }
 });

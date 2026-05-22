@@ -41,14 +41,7 @@ const CUSTOM_FOODS_FILE_PATH = path.join(dataDir, "thuc_pham_thuong_an.json");
 
 // Helper function to seed initial custom foods if file doesn't exist
 function getInitialSeededCustomFoods(): any[] {
-  return [
-    { id: "cf-1", name: "Ức gà áp chảo", servingSize: "100g", calories: 165, protein: 31, carb: 0, fat: 3.6 },
-    { id: "cf-2", name: "Trứng gà luộc", servingSize: "1 quả", calories: 75, protein: 6.3, carb: 0.6, fat: 5.3 },
-    { id: "cf-3", name: "Cơm trắng", servingSize: "150g", calories: 195, protein: 4, carb: 42, fat: 0.5 },
-    { id: "cf-4", name: "Thịt thăn bò", servingSize: "100g", calories: 129, protein: 21, carb: 0, fat: 5 },
-    { id: "cf-5", name: "Sữa chua ít đường", servingSize: "1 hũ", calories: 80, protein: 4, carb: 12, fat: 2 },
-    { id: "cf-6", name: "Bột Whey Protein", servingSize: "1 muỗng (30g)", calories: 120, protein: 25, carb: 2, fat: 1.5 }
-  ];
+  return [];
 }
 
 // Read custom foods from JSON file specific to a user

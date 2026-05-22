@@ -1,6 +1,6 @@
 {
-  "short_name": "TinhCalo",
-  "name": "Tính Calo Dinh Dưỡng",
+  "short_name": "Nhật ký Ăn Uống",
+  "name": "Nhật ký Ăn Uống",
   "description": "Ứng dụng tính toán calo, protein, carb, fat từ thực phẩm bằng Gemini AI, lưu nhật ký ăn uống theo tuần/tháng.",
   "icons": [
     {

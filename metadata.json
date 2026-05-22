@@ -1,5 +1,5 @@
 {
-  "name": "Tính Calo",
+  "name": "Nhật ký Ăn Uống",
   "description": "Ứng dụng tính toán calo, protein, carb, fat từ thực phẩm bằng Gemini AI, lưu lịch sử ăn uống theo tuần/tháng, và gợi ý công thức món ăn dinh dưỡng.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

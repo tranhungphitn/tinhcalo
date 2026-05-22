@@ -147,32 +147,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
     }
   };
 
-  // Pre-seed helper to fill template examples
-  const handleSeedDefaults = async () => {
-    setErrorMsg(null);
-    const defaults = [
-      { id: "cf-seed-1", name: "Cơm chiên trứng", servingSize: "1 đĩa", calories: 350, protein: 12, carb: 55, fat: 8 },
-      { id: "cf-seed-2", name: "Phở gà ta", servingSize: "1 tô", calories: 420, protein: 25, carb: 60, fat: 10 },
-      { id: "cf-seed-3", name: "Chuối chín", servingSize: "1 quả", calories: 90, protein: 1.2, carb: 22, fat: 0.3 },
-      { id: "cf-seed-4", name: "Sinh tố bơ sữa đặc", servingSize: "1 ly cốc", calories: 280, protein: 3.5, carb: 40, fat: 14 }
-    ];
 
-    // Combine avoiding exact duplicates
-    const finalFoods = [...customFoods];
-    defaults.forEach(def => {
-      if (!finalFoods.some(existing => existing.name.toLowerCase() === def.name.toLowerCase())) {
-        finalFoods.push(def);
-      }
-    });
-
-    try {
-      await onUpdateCustomFoods(finalFoods);
-      setSuccessMsg("Đã tải thêm một số món ăn Việt Nam gợi ý thành công!");
-      setTimeout(() => setSuccessMsg(null), 3000);
-    } catch (err) {
-      setErrorMsg("Lỗi khi ghi dữ liệu mẫu lên máy chủ.");
-    }
-  };
 
   const filteredFoods = customFoods.filter(f =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -311,14 +286,6 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
               >
                 <Plus className="w-4 h-4" />
                 Lưu thực phẩm mới
-              </button>
-              <button
-                type="button"
-                onClick={handleSeedDefaults}
-                className="px-4 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-500 text-xs font-bold py-3 rounded-xl transition-all cursor-pointer"
-                title="Tải thực phẩm mẫu"
-              >
-                Tải mẫu gợi ý
               </button>
             </div>
           </form>

@@ -176,9 +176,9 @@ export default function App() {
       if (localCustomStr) {
         try {
           localCustomList = JSON.parse(localCustomStr);
-          if (localCustomList.length > 0) {
-            setCustomFoods(localCustomList);
-          }
+          // Loại bỏ tất cả dữ liệu mẫu cũ
+          localCustomList = localCustomList.filter(f => !/^(cf-[1-6]|cf-seed-\d+)$/.test(f.id));
+          setCustomFoods(localCustomList);
         } catch (e) {
           console.error("Lỗi phân tích custom foods từ localStorage:", e);
         }
@@ -189,15 +189,17 @@ export default function App() {
           headers: { "x-username": currentUser.username }
         });
         if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            // Nếu local rỗng hoặc server có dữ liệu mới (không phải default seeded)
-            const isDefaultSeeded = data.length === 6 && data[0]?.id === "cf-1" && data[5]?.id === "cf-6";
-            if (!isDefaultSeeded || localCustomList.length === 0) {
-              setCustomFoods(data);
-              localStorage.setItem(localCustomKey, JSON.stringify(data));
-            } else if (localCustomList.length > 0) {
-              // Server bị reset về default, đồng bộ ngược từ local lên server (tất cả user đều có quyền)
+          let data = await res.json();
+          if (Array.isArray(data)) {
+            // Loại bỏ tất cả dữ liệu mẫu cũ từ server
+            data = data.filter((f: any) => !/^(cf-[1-6]|cf-seed-\d+)$/.test(f.id));
+            
+            // Cập nhật state & local
+            setCustomFoods(data);
+            localStorage.setItem(localCustomKey, JSON.stringify(data));
+
+            // Nếu server rỗng nhưng local sau khi lọc lại có dữ liệu, đồng bộ ngược lên server
+            if (data.length === 0 && localCustomList.length > 0) {
               await fetch("/api/custom-foods", {
                 method: "POST",
                 headers: { 
@@ -707,60 +709,56 @@ export default function App() {
         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
         <div className="absolute -left-10 bottom-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-2xl pointer-events-none"></div>
 
-        <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-3.5">
-              <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-inner">
-                <ChefHat className="w-8 h-8 text-emerald-100 animate-bounce" />
+        <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 relative z-10">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
+              <div className="p-2 sm:p-3 bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/10 shadow-inner shrink-0">
+                <ChefHat className="w-5.5 h-5.5 sm:w-8 sm:h-8 text-emerald-100 animate-bounce" />
               </div>
-              <div>
-                <span className="text-[10px] uppercase tracking-widest font-black text-emerald-200 block">
-                  Cá nhân hóa Dinh dưỡng & Thể hình
-                </span>
-                <h1 className="text-2xl sm:text-3.5xl font-extrabold tracking-tight text-white mt-0.5">
-                  Tính Calo
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-2xl font-extrabold tracking-tight text-white truncate leading-tight">
+                  Nhật ký Ăn Uống
                 </h1>
-                <p className="text-sm text-emerald-100/90 font-medium mt-1">
-                  Tính toán hàm lượng Calories & Macros lập tức, lưu trữ thông minh và đề xuất tỷ lệ dinh dưỡng chuẩn xác
-                </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3.5 self-start md:self-auto">
+            <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
               {!isStandalone && (
                 <button
                   type="button"
                   onClick={handleInstallClick}
-                  className="bg-white/10 hover:bg-white/20 active:scale-95 text-white px-3 py-2 rounded-2xl border border-white/10 transition-all cursor-pointer shadow-xs flex items-center gap-1.5 shrink-0 text-xs font-bold"
+                  className="bg-white/10 hover:bg-white/20 active:scale-95 text-white px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border border-white/10 transition-all cursor-pointer shadow-xs flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-bold"
                   title="Cài đặt ứng dụng trên điện thoại/máy tính"
                 >
-                  <Smartphone className="w-4 h-4 text-emerald-200" />
-                  <span>Cài đặt App</span>
+                  <Smartphone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-200" />
+                  <span className="hidden sm:inline">Cài đặt App</span>
+                  <span className="sm:hidden">Cài App</span>
                 </button>
               )}
-              <div className="flex items-center gap-3 bg-black/15 backdrop-blur-sm px-4 py-2 rounded-2xl border border-white/5 shrink-0 select-none">
-                <div className="w-8 h-8 rounded-full bg-emerald-300 text-emerald-950 font-black flex items-center justify-center text-xs shadow-inner border border-emerald-200 shrink-0 uppercase">
+              <div className="flex items-center gap-2 bg-black/15 backdrop-blur-sm px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border border-white/5 select-none shrink-0">
+                <div className="w-6.5 h-6.5 sm:w-8 sm:h-8 rounded-full bg-emerald-300 text-emerald-950 font-black flex items-center justify-center text-[10px] sm:text-xs shadow-inner border border-emerald-200 shrink-0 uppercase">
                   {currentUser?.username?.substring(0, 2) || "US"}
                 </div>
-                <div>
+                <div className="hidden sm:block">
                   <div className="flex items-center gap-1.5 leading-none">
                     <p className="text-[9px] font-extrabold text-emerald-200 uppercase tracking-widest">
                       {currentUser?.role === "admin" ? "ADMIN" : "USER"}
                     </p>
                   </div>
-                  <p className="text-xs font-extrabold text-white truncate max-w-[150px] mt-0.5">
+                  <p className="text-xs font-extrabold text-white truncate max-w-[120px] mt-0.5">
                     {currentUser?.name || "Người dùng"}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="ml-2 bg-rose-500/80 hover:bg-rose-600 active:scale-95 text-white px-2.5 py-1.5 text-[9px] font-black rounded-xl border border-rose-400/20 transition-all cursor-pointer shadow-3xs uppercase tracking-wider shrink-0"
-                  title="Đăng xuất tài khoản"
-                >
-                  Đăng xuất
-                </button>
               </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="bg-rose-500/80 hover:bg-rose-600 active:scale-95 text-white px-2.5 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-xl border border-rose-400/20 transition-all cursor-pointer shadow-3xs uppercase tracking-wider shrink-0"
+                title="Đăng xuất tài khoản"
+              >
+                <span className="hidden sm:inline">Đăng xuất</span>
+                <span className="sm:hidden">Thoát</span>
+              </button>
             </div>
           </div>
         </div>

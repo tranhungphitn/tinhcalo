@@ -383,101 +383,103 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
               </p>
             </div>
           ) : (
-            <div className="border border-slate-150 rounded-2xl overflow-hidden shadow-2xs">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-100/80 text-[10px] text-slate-500 font-bold border-b border-slate-200 leading-none">
-                    <th className="py-3 px-4">Tên thực phẩm (Khẩu phần)</th>
-                    <th className="py-3 px-2 text-center text-amber-600">Calo</th>
-                    <th className="py-3 px-2 text-center text-emerald-600">🥩 Đạm</th>
-                    <th className="py-3 px-2 text-center text-sky-600">🍚 Carb</th>
-                    <th className="py-3 px-2 text-center text-rose-500">🧈 Béo</th>
-                    <th className="py-3 px-4 text-center">Hành động</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-[11px] text-slate-600 font-medium">
-                  {filteredFoods.map((food) => {
-                    const isEditing = editingId === food.id;
-                    return (
-                      <tr key={food.id} className="hover:bg-slate-50/40 transition-colors">
-                        <td className="py-3 px-4">
-                          {isEditing ? (
-                            <div className="space-y-1.5 py-1">
+            <>
+              {/* Desktop view: Table layout */}
+              <div className="hidden md:block border border-slate-150 rounded-2xl overflow-hidden shadow-2xs">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-100/80 text-[10px] text-slate-500 font-bold border-b border-slate-200 leading-none">
+                      <th className="py-3 px-4">Tên thực phẩm (Khẩu phần)</th>
+                      <th className="py-3 px-2 text-center text-amber-600">Calo</th>
+                      <th className="py-3 px-2 text-center text-emerald-600">🥩 Đạm</th>
+                      <th className="py-3 px-2 text-center text-sky-600">🍚 Carb</th>
+                      <th className="py-3 px-2 text-center text-rose-500">🧈 Béo</th>
+                      <th className="py-3 px-4 text-center">Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-[11px] text-slate-600 font-medium">
+                    {filteredFoods.map((food) => {
+                      const isEditing = editingId === food.id;
+                      return (
+                        <tr key={food.id} className="hover:bg-slate-50/40 transition-colors">
+                          <td className="py-3 px-4">
+                            {isEditing ? (
+                              <div className="space-y-1.5 py-1">
+                                <input
+                                  type="text"
+                                  className="bg-white border border-slate-300 focus:border-emerald-500 focus:outline-hidden p-1 px-2 rounded-lg text-xs font-semibold w-full"
+                                  value={editName}
+                                  onChange={(e) => setEditName(e.target.value)}
+                                />
+                                <input
+                                  type="text"
+                                  className="bg-white border border-slate-300 focus:border-emerald-500 focus:outline-hidden p-1 px-2 rounded-lg text-[10px] text-slate-500 w-full"
+                                  value={editServingSize}
+                                  onChange={(e) => setEditServingSize(e.target.value)}
+                                />
+                              </div>
+                            ) : (
+                              <div>
+                                <span className="font-bold text-slate-700 block text-xs leading-tight">{food.name}</span>
+                                <span className="text-[10px] text-slate-400 font-semibold uppercase">Hạn mức: {food.servingSize}</span>
+                              </div>
+                            )}
+                          </td>
+
+                          <td className="py-3 px-2 text-center">
+                            {isEditing ? (
                               <input
-                                type="text"
-                                className="bg-white border border-slate-300 focus:border-emerald-500 focus:outline-hidden p-1 px-2 rounded-lg text-xs font-semibold w-full"
-                                value={editName}
-                                onChange={(e) => setEditName(e.target.value)}
+                                type="number"
+                                className="bg-white border border-slate-300 p-1 rounded-md text-center max-w-[60px] font-bold text-amber-600 focus:outline-hidden text-xs"
+                                value={editCalories}
+                                onChange={(e) => setEditCalories(e.target.value === "" ? "" : Number(e.target.value))}
                               />
+                            ) : (
+                              <span className="font-extrabold text-amber-600 text-xs">{food.calories}</span>
+                            )}
+                          </td>
+
+                          <td className="py-3 px-2 text-center">
+                            {isEditing ? (
                               <input
-                                type="text"
-                                className="bg-white border border-slate-300 focus:border-emerald-500 focus:outline-hidden p-1 px-2 rounded-lg text-[10px] text-slate-500 w-full"
-                                value={editServingSize}
-                                onChange={(e) => setEditServingSize(e.target.value)}
+                                type="number"
+                                step="0.1"
+                                className="bg-white border border-slate-300 p-1 rounded-md text-center max-w-[50px] font-bold text-emerald-600 focus:outline-hidden text-xs"
+                                value={editProtein}
+                                onChange={(e) => setEditProtein(e.target.value === "" ? "" : Number(e.target.value))}
                               />
-                            </div>
-                          ) : (
-                            <div>
-                              <span className="font-bold text-slate-700 block text-xs leading-tight">{food.name}</span>
-                              <span className="text-[10px] text-slate-400 font-semibold uppercase">Hạn mức: {food.servingSize}</span>
-                            </div>
-                          )}
-                        </td>
+                            ) : (
+                              <span className="font-bold text-emerald-600">{food.protein}g</span>
+                            )}
+                          </td>
 
-                        <td className="py-3 px-2 text-center">
-                          {isEditing ? (
-                            <input
-                              type="number"
-                              className="bg-white border border-slate-300 p-1 rounded-md text-center max-w-[60px] font-bold text-amber-600 focus:outline-hidden text-xs"
-                              value={editCalories}
-                              onChange={(e) => setEditCalories(e.target.value === "" ? "" : Number(e.target.value))}
-                            />
-                          ) : (
-                            <span className="font-extrabold text-amber-600 text-xs">{food.calories}</span>
-                          )}
-                        </td>
+                          <td className="py-3 px-2 text-center">
+                            {isEditing ? (
+                              <input
+                                type="number"
+                                step="0.1"
+                                className="bg-white border border-slate-300 p-1 rounded-md text-center max-w-[50px] font-bold text-sky-600 focus:outline-hidden text-xs"
+                                value={editCarb}
+                                onChange={(e) => setEditCarb(e.target.value === "" ? "" : Number(e.target.value))}
+                              />
+                            ) : (
+                              <span className="font-bold text-sky-600">{food.carb}g</span>
+                            )}
+                          </td>
 
-                        <td className="py-3 px-2 text-center">
-                          {isEditing ? (
-                            <input
-                              type="number"
-                              step="0.1"
-                              className="bg-white border border-slate-300 p-1 rounded-md text-center max-w-[50px] font-bold text-emerald-600 focus:outline-hidden text-xs"
-                              value={editProtein}
-                              onChange={(e) => setEditProtein(e.target.value === "" ? "" : Number(e.target.value))}
-                            />
-                          ) : (
-                            <span className="font-bold text-emerald-600">{food.protein}g</span>
-                          )}
-                        </td>
-
-                        <td className="py-3 px-2 text-center">
-                          {isEditing ? (
-                            <input
-                              type="number"
-                              step="0.1"
-                              className="bg-white border border-slate-300 p-1 rounded-md text-center max-w-[50px] font-bold text-sky-600 focus:outline-hidden text-xs"
-                              value={editCarb}
-                              onChange={(e) => setEditCarb(e.target.value === "" ? "" : Number(e.target.value))}
-                            />
-                          ) : (
-                            <span className="font-bold text-sky-600">{food.carb}g</span>
-                          )}
-                        </td>
-
-                        <td className="py-3 px-2 text-center">
-                          {isEditing ? (
-                            <input
-                              type="number"
-                              step="0.1"
-                              className="bg-white border border-slate-300 p-1 rounded-md text-center max-w-[50px] font-bold text-rose-500 focus:outline-hidden text-xs"
-                              value={editFat}
-                              onChange={(e) => setEditFat(e.target.value === "" ? "" : Number(e.target.value))}
-                            />
-                          ) : (
-                            <span className="font-bold text-rose-500">{food.fat}g</span>
-                          )}
-                        </td>
+                          <td className="py-3 px-2 text-center">
+                            {isEditing ? (
+                              <input
+                                type="number"
+                                step="0.1"
+                                className="bg-white border border-slate-300 p-1 rounded-md text-center max-w-[50px] font-bold text-rose-500 focus:outline-hidden text-xs"
+                                value={editFat}
+                                onChange={(e) => setEditFat(e.target.value === "" ? "" : Number(e.target.value))}
+                              />
+                            ) : (
+                              <span className="font-bold text-rose-500">{food.fat}g</span>
+                            )}
+                          </td>
 
                           <td className="py-3 px-4 text-center">
                             <div className="flex items-center justify-center gap-1.5">
@@ -521,12 +523,153 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                               )}
                             </div>
                           </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile view: Cards list layout */}
+              <div className="md:hidden space-y-3.5">
+                {filteredFoods.map((food) => {
+                  const isEditing = editingId === food.id;
+                  return (
+                    <div
+                      key={food.id}
+                      className="bg-slate-50/60 border border-slate-150 rounded-2xl p-4.5 space-y-3.5 hover:bg-slate-50 transition-colors shadow-3xs"
+                    >
+                      {isEditing ? (
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-500 block mb-1 uppercase tracking-wider">Tên thực phẩm</label>
+                            <input
+                              type="text"
+                              className="w-full bg-white border border-slate-300 focus:border-emerald-500 focus:outline-hidden p-2 rounded-xl text-xs font-semibold"
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-500 block mb-1 uppercase tracking-wider">Khẩu phần</label>
+                            <input
+                              type="text"
+                              className="w-full bg-white border border-slate-300 focus:border-emerald-500 focus:outline-hidden p-2 rounded-xl text-xs font-semibold"
+                              value={editServingSize}
+                              onChange={(e) => setEditServingSize(e.target.value)}
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-[10px] font-bold text-amber-600 block mb-1 uppercase tracking-wider">🔥 Calo (kcal)</label>
+                              <input
+                                type="number"
+                                className="w-full bg-white border border-slate-300 p-2 rounded-xl font-bold text-amber-600 focus:outline-hidden text-xs"
+                                value={editCalories}
+                                onChange={(e) => setEditCalories(e.target.value === "" ? "" : Number(e.target.value))}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold text-emerald-600 block mb-1 uppercase tracking-wider">🥩 Đạm (g)</label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                className="w-full bg-white border border-slate-300 p-2 rounded-xl font-bold text-emerald-600 focus:outline-hidden text-xs"
+                                value={editProtein}
+                                onChange={(e) => setEditProtein(e.target.value === "" ? "" : Number(e.target.value))}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold text-sky-600 block mb-1 uppercase tracking-wider">🍚 Carb (g)</label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                className="w-full bg-white border border-slate-300 p-2 rounded-xl font-bold text-sky-600 focus:outline-hidden text-xs"
+                                value={editCarb}
+                                onChange={(e) => setEditCarb(e.target.value === "" ? "" : Number(e.target.value))}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold text-rose-500 block mb-1 uppercase tracking-wider">🧈 Béo (g)</label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                className="w-full bg-white border border-slate-300 p-2 rounded-xl font-bold text-rose-500 focus:outline-hidden text-xs"
+                                value={editFat}
+                                onChange={(e) => setEditFat(e.target.value === "" ? "" : Number(e.target.value))}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex gap-2.5 pt-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleSaveEdit(food.id)}
+                              className="flex-1 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs"
+                            >
+                              <Check className="w-4 h-4" />
+                              Lưu thay đổi
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingId(null)}
+                              className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold rounded-xl transition-all cursor-pointer text-xs"
+                            >
+                              Hủy
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-start gap-4">
+                            <div>
+                              <h4 className="font-extrabold text-slate-800 text-sm leading-snug break-words">{food.name}</h4>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Khẩu phần: {food.servingSize}</span>
+                            </div>
+                            <div className="flex gap-1.5 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleStartEdit(food)}
+                                className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all cursor-pointer"
+                                title="Chỉnh sửa sản phẩm"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteFood(food.id, food.name)}
+                                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                                title="Xóa sản phẩm"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-4 gap-2 bg-white p-3 rounded-2xl border border-slate-100 text-center shadow-3xs">
+                            <div className="flex flex-col items-center">
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Calo</span>
+                              <span className="font-extrabold text-amber-600 text-xs">{food.calories}</span>
+                            </div>
+                            <div className="flex flex-col items-center border-l border-slate-100">
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">🥩 Đạm</span>
+                              <span className="font-bold text-emerald-600 text-xs">{food.protein}g</span>
+                            </div>
+                            <div className="flex flex-col items-center border-l border-slate-100">
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">🍚 Carb</span>
+                              <span className="font-bold text-sky-600 text-xs">{food.carb}g</span>
+                            </div>
+                            <div className="flex flex-col items-center border-l border-slate-100">
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">🧈 Béo</span>
+                              <span className="font-bold text-rose-500 text-xs">{food.fat}g</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       </div>

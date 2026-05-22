@@ -83,29 +83,86 @@ export default function App() {
     if (!currentUser) return;
 
     const fetchMeals = async () => {
+      const localMealsKey = `macro_tracker_meals_${currentUser.username}`;
+      const localMealsStr = localStorage.getItem(localMealsKey);
+      let localMealsList: Meal[] = [];
+      if (localMealsStr) {
+        try {
+          localMealsList = JSON.parse(localMealsStr);
+          if (localMealsList.length > 0) {
+            setMeals(localMealsList);
+          }
+        } catch (e) {
+          console.error("Lỗi phân tích meals từ localStorage:", e);
+        }
+      }
+
       try {
         const res = await fetch("/api/meals", {
           headers: { "x-username": currentUser.username }
         });
         if (res.ok) {
           const data = await res.json();
-          setMeals(data);
-        } else {
-          setMeals([]);
+          if (Array.isArray(data) && data.length > 0) {
+            setMeals(data);
+            localStorage.setItem(localMealsKey, JSON.stringify(data));
+          } else if (localMealsList.length > 0) {
+            // Server không có dữ liệu (có thể do Vercel restart), đồng bộ ngược từ LocalStorage lên Server
+            await fetch("/api/meals", {
+              method: "POST",
+              headers: { 
+                "Content-Type": "application/json",
+                "x-username": currentUser.username
+              },
+              body: JSON.stringify({ meals: localMealsList })
+            });
+          } else {
+            setMeals([]);
+          }
         }
       } catch (err) {
         console.error("Lỗi khi tải lịch sử ăn uống:", err);
-        setMeals([]);
       }
     };
     fetchMeals();
 
     const fetchCustomFoods = async () => {
+      const localCustomKey = "macro_tracker_custom_foods";
+      const localCustomStr = localStorage.getItem(localCustomKey);
+      let localCustomList: CustomFood[] = [];
+      if (localCustomStr) {
+        try {
+          localCustomList = JSON.parse(localCustomStr);
+          if (localCustomList.length > 0) {
+            setCustomFoods(localCustomList);
+          }
+        } catch (e) {
+          console.error("Lỗi phân tích custom foods từ localStorage:", e);
+        }
+      }
+
       try {
         const res = await fetch("/api/custom-foods");
         if (res.ok) {
           const data = await res.json();
-          setCustomFoods(data);
+          if (Array.isArray(data) && data.length > 0) {
+            // Nếu local rỗng hoặc server có dữ liệu mới (không phải default seeded)
+            const isDefaultSeeded = data.length === 6 && data[0]?.id === "cf-1" && data[5]?.id === "cf-6";
+            if (!isDefaultSeeded || localCustomList.length === 0) {
+              setCustomFoods(data);
+              localStorage.setItem(localCustomKey, JSON.stringify(data));
+            } else if (localCustomList.length > 0 && currentUser.role === "admin") {
+              // Server bị reset về default, đồng bộ ngược từ local lên server (chỉ admin được phép)
+              await fetch("/api/custom-foods", {
+                method: "POST",
+                headers: { 
+                  "Content-Type": "application/json",
+                  "x-username": currentUser.username
+                },
+                body: JSON.stringify({ customFoods: localCustomList })
+              });
+            }
+          }
         }
       } catch (err) {
         console.error("Lỗi khi tải danh sách thực phẩm cá nhân:", err);
@@ -115,27 +172,54 @@ export default function App() {
 
     // Specific user goal storage from backend file system
     const fetchUserGoal = async () => {
+      const localGoalKey = `macro_tracker_goal_${currentUser.username}`;
+      const localGoalStr = localStorage.getItem(localGoalKey);
+      let localGoalObj: DailyGoal | null = null;
+      if (localGoalStr) {
+        try {
+          localGoalObj = JSON.parse(localGoalStr);
+          if (localGoalObj) {
+            setDailyGoal(localGoalObj);
+            setGoalEditingCal(localGoalObj.calories);
+            setGoalEditingProt(localGoalObj.protein);
+            setGoalEditingCarb(localGoalObj.carb);
+            setGoalEditingFat(localGoalObj.fat);
+          }
+        } catch (e) {
+          console.error("Lỗi phân tích mục tiêu từ localStorage:", e);
+        }
+      }
+
       try {
         const res = await fetch("/api/goal", {
           headers: { "x-username": currentUser.username }
         });
         if (res.ok) {
           const parsed = await res.json();
-          setDailyGoal(parsed);
-          setGoalEditingCal(parsed.calories);
-          setGoalEditingProt(parsed.protein);
-          setGoalEditingCarb(parsed.carb);
-          setGoalEditingFat(parsed.fat);
-        } else {
-          setDailyGoal(DEFAULT_GOAL);
-          setGoalEditingCal(DEFAULT_GOAL.calories);
-          setGoalEditingProt(DEFAULT_GOAL.protein);
-          setGoalEditingCarb(DEFAULT_GOAL.carb);
-          setGoalEditingFat(DEFAULT_GOAL.fat);
+          const isDefaultServerGoal = parsed.calories === 1800 && parsed.protein === 120 && parsed.carb === 200 && parsed.fat === 55;
+          if (parsed && typeof parsed.calories === "number") {
+            if (!isDefaultServerGoal || !localGoalObj) {
+              setDailyGoal(parsed);
+              setGoalEditingCal(parsed.calories);
+              setGoalEditingProt(parsed.protein);
+              setGoalEditingCarb(parsed.carb);
+              setGoalEditingFat(parsed.fat);
+              localStorage.setItem(localGoalKey, JSON.stringify(parsed));
+            } else if (localGoalObj && isDefaultServerGoal) {
+              // Server bị reset về mặc định nhưng client có cấu hình riêng, đồng bộ ngược lên server
+              await fetch("/api/goal", {
+                method: "POST",
+                headers: { 
+                  "Content-Type": "application/json",
+                  "x-username": currentUser.username
+                },
+                body: JSON.stringify({ goal: localGoalObj })
+              });
+            }
+          }
         }
       } catch (e) {
         console.error("Không thể tải mục tiêu dinh dưỡng từ backend:", e);
-        setDailyGoal(DEFAULT_GOAL);
       }
     };
     fetchUserGoal();
@@ -199,6 +283,11 @@ export default function App() {
   const saveMealsToStorage = async (updatedMeals: Meal[]) => {
     setMeals(updatedMeals);
     if (!currentUser) return;
+    
+    // Save to localStorage immediately for instant local persistence
+    const localMealsKey = `macro_tracker_meals_${currentUser.username}`;
+    localStorage.setItem(localMealsKey, JSON.stringify(updatedMeals));
+
     try {
       await fetch("/api/meals", {
         method: "POST",
@@ -216,6 +305,11 @@ export default function App() {
   const saveGoalToStorage = async (updatedGoal: DailyGoal) => {
     setDailyGoal(updatedGoal);
     if (!currentUser) return;
+
+    // Save to localStorage immediately for instant local persistence
+    const localGoalKey = `macro_tracker_goal_${currentUser.username}`;
+    localStorage.setItem(localGoalKey, JSON.stringify(updatedGoal));
+
     try {
       await fetch("/api/goal", {
         method: "POST",
@@ -233,6 +327,11 @@ export default function App() {
   const handleUpdateCustomFoods = async (updatedFoods: CustomFood[]) => {
     setCustomFoods(updatedFoods);
     if (!currentUser) return;
+
+    // Save to localStorage immediately for instant local persistence
+    const localCustomKey = "macro_tracker_custom_foods";
+    localStorage.setItem(localCustomKey, JSON.stringify(updatedFoods));
+
     try {
       await fetch("/api/custom-foods", {
         method: "POST",

@@ -252,7 +252,7 @@ app.post("/api/meals", (req, res) => {
       return res.status(400).json({ error: "Dữ liệu gửi lên phải là một danh sách bữa ăn." });
     }
     const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
-    const filePath = path.join(process.cwd(), `lich_su_an_uong_${safeUsername}.json`);
+    const filePath = path.join(dataDir, `lich_su_an_uong_${safeUsername}.json`);
     fs.writeFileSync(filePath, JSON.stringify(meals, null, 2), "utf-8");
     return res.json({ success: true, count: meals.length });
   } catch (error: any) {
@@ -300,7 +300,7 @@ app.post("/api/goal", (req, res) => {
       return res.status(400).json({ error: "Dữ liệu mục tiêu dinh dưỡng không đúng cấu trúc." });
     }
     const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
-    const filePath = path.join(process.cwd(), `muc_tieu_${safeUsername}.json`);
+    const filePath = path.join(dataDir, `muc_tieu_${safeUsername}.json`);
     fs.writeFileSync(filePath, JSON.stringify(goal, null, 2), "utf-8");
     return res.json({ success: true, goal });
   } catch (error: any) {

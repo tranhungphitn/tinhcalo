@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
+import admin from "firebase-admin";
 
 // Load environment variables
 dotenv.config();
@@ -13,8 +14,39 @@ const dataDir = isVercel ? "/tmp" : process.cwd();
 const app = express();
 const PORT = Number(process.env.PORT) || 4122;
 
-
 app.use(express.json());
+
+// Initialize Firebase Admin if Service Account is provided
+let db: admin.firestore.Firestore | null = null;
+try {
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (serviceAccountJson) {
+    let serviceAccount: any;
+    try {
+      if (serviceAccountJson.trim().startsWith("{")) {
+        serviceAccount = JSON.parse(serviceAccountJson);
+      } else {
+        const decoded = Buffer.from(serviceAccountJson, "base64").toString("utf-8");
+        serviceAccount = JSON.parse(decoded);
+      }
+    } catch (e) {
+      console.error("Lỗi khi parse FIREBASE_SERVICE_ACCOUNT. Thử parse trực tiếp...", e);
+      serviceAccount = JSON.parse(serviceAccountJson);
+    }
+
+    if (serviceAccount) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+      db = admin.firestore();
+      console.log("Khởi tạo Firebase Admin SDK thành công.");
+    }
+  } else {
+    console.log("Không tìm thấy cấu hình FIREBASE_SERVICE_ACCOUNT. Sử dụng chế độ lưu file JSON cục bộ.");
+  }
+} catch (error) {
+  console.error("Lỗi khi khởi tạo Firebase Admin SDK:", error);
+}
 
 // Helper for lazy loading Gemini Client
 let geminiClient: GoogleGenAI | null = null;
@@ -44,16 +76,38 @@ function getInitialSeededCustomFoods(): any[] {
   return [];
 }
 
-// Read custom foods from JSON file specific to a user
-function readCustomFoodsFromFile(username: string): any[] {
+// Read custom foods from JSON file specific to a user or Firestore
+async function readCustomFoodsFromFile(username: string): Promise<any[]> {
+  const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
+  
+  if (db) {
+    try {
+      const doc = await db.collection("custom_foods").doc(safeUsername).get();
+      if (doc.exists) {
+        const data = doc.data();
+        if (data && Array.isArray(data.foods)) {
+          return data.foods;
+        }
+      }
+      const defaultFoods = readCustomFoodsLocal(safeUsername);
+      await db.collection("custom_foods").doc(safeUsername).set({ foods: defaultFoods });
+      return defaultFoods;
+    } catch (error) {
+      console.error(`Lỗi khi đọc custom_foods từ Firestore cho ${username}, chuyển sang file:`, error);
+      return readCustomFoodsLocal(safeUsername);
+    }
+  } else {
+    return readCustomFoodsLocal(safeUsername);
+  }
+}
+
+function readCustomFoodsLocal(safeUsername: string): any[] {
   try {
-    const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
     const filePath = path.join(dataDir, `thuc_pham_thuong_an_${safeUsername}.json`);
     if (fs.existsSync(filePath)) {
       const fileData = fs.readFileSync(filePath, "utf-8");
       return JSON.parse(fileData);
     } else {
-      // Seed dynamically: if global default file exists, copy it, otherwise seed from helper
       let defaultFoods: any[] = [];
       if (fs.existsSync(CUSTOM_FOODS_FILE_PATH)) {
         try {
@@ -69,9 +123,29 @@ function readCustomFoodsFromFile(username: string): any[] {
       return defaultFoods;
     }
   } catch (err) {
-    console.error(`Lỗi khi đọc file thuc_pham_thuong_an_${username}.json:`, err);
+    console.error(`Lỗi khi đọc file thuc_pham_thuong_an_${safeUsername}.json:`, err);
     return getInitialSeededCustomFoods();
   }
+}
+
+async function writeCustomFoods(username: string, customFoods: any[]): Promise<void> {
+  const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
+  
+  if (db) {
+    try {
+      await db.collection("custom_foods").doc(safeUsername).set({ foods: customFoods });
+    } catch (error) {
+      console.error(`Lỗi khi ghi custom_foods lên Firestore cho ${username}, ghi xuống file cục bộ:`, error);
+      writeCustomFoodsLocal(safeUsername, customFoods);
+    }
+  } else {
+    writeCustomFoodsLocal(safeUsername, customFoods);
+  }
+}
+
+function writeCustomFoodsLocal(safeUsername: string, customFoods: any[]): void {
+  const filePath = path.join(dataDir, `thuc_pham_thuong_an_${safeUsername}.json`);
+  fs.writeFileSync(filePath, JSON.stringify(customFoods, null, 2), "utf-8");
 }
 
 // 1. Endpoint: Trích xuất thông tin dinh dưỡng từ mô tả đồ ăn (có ưu tiên Dữ liệu Thức Ăn cá nhân trước, rồi cá biệt hóa internet sau)
@@ -83,7 +157,7 @@ app.post("/api/macros/extract", async (req, res) => {
     }
 
     const username = (req.headers["x-username"] as string) || "default";
-    const customFoods = readCustomFoodsFromFile(username);
+    const customFoods = await readCustomFoodsFromFile(username);
     const ai = getGeminiClient();
 
     let customFoodsPromptPart = "";
@@ -162,10 +236,10 @@ Nhiệm vụ đặc biệt quan trọng (ƯU TIÊN TUYỆT ĐỐI SỐ 1 - TRONG
 });
 
 // Endpoint: Lấy danh sách Dữ liệu Thức Ăn cá nhân
-app.get("/api/custom-foods", (req, res) => {
+app.get("/api/custom-foods", async (req, res) => {
   try {
     const username = (req.headers["x-username"] as string) || "default";
-    const list = readCustomFoodsFromFile(username);
+    const list = await readCustomFoodsFromFile(username);
     return res.json(list);
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Không thể đọc danh sách thực phẩm cá nhân." });
@@ -173,19 +247,17 @@ app.get("/api/custom-foods", (req, res) => {
 });
 
 // Endpoint: Cập nhật danh sách Dữ liệu Thức Ăn cá nhân
-app.post("/api/custom-foods", (req, res) => {
+app.post("/api/custom-foods", async (req, res) => {
   try {
     const username = (req.headers["x-username"] as string) || "default";
     const { customFoods } = req.body;
     if (!Array.isArray(customFoods)) {
       return res.status(400).json({ error: "Dữ liệu gửi lên phải là một danh sách dữ liệu thức ăn." });
     }
-    const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
-    const filePath = path.join(dataDir, `thuc_pham_thuong_an_${safeUsername}.json`);
-    fs.writeFileSync(filePath, JSON.stringify(customFoods, null, 2), "utf-8");
+    await writeCustomFoods(username, customFoods);
     return res.json({ success: true, count: customFoods.length });
   } catch (error: any) {
-    console.error(`Lỗi khi ghi file thuc_pham_thuong_an_${username}.json:`, error);
+    console.error(`Lỗi khi ghi dữ liệu thức ăn của ${username}:`, error);
     return res.status(500).json({ error: error.message || "Không thể lưu danh sách dữ liệu thức ăn." });
   }
 });
@@ -221,10 +293,33 @@ function getInitialSeededMeals(): any[] {
   return [];
 }
 
-// Read meals from JSON file specific to a user
-function readMealsFromFile(username: string): any[] {
+// Read meals from JSON file specific to a user or Firestore
+async function readMealsFromFile(username: string): Promise<any[]> {
+  const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
+  
+  if (db) {
+    try {
+      const doc = await db.collection("meals").doc(safeUsername).get();
+      if (doc.exists) {
+        const data = doc.data();
+        if (data && Array.isArray(data.meals)) {
+          return data.meals;
+        }
+      }
+      const defaultMeals = readMealsLocal(safeUsername);
+      await db.collection("meals").doc(safeUsername).set({ meals: defaultMeals });
+      return defaultMeals;
+    } catch (error) {
+      console.error(`Lỗi khi đọc meals từ Firestore cho ${username}, chuyển sang file:`, error);
+      return readMealsLocal(safeUsername);
+    }
+  } else {
+    return readMealsLocal(safeUsername);
+  }
+}
+
+function readMealsLocal(safeUsername: string): any[] {
   try {
-    const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
     const filePath = path.join(dataDir, `lich_su_an_uong_${safeUsername}.json`);
     if (fs.existsSync(filePath)) {
       const fileData = fs.readFileSync(filePath, "utf-8");
@@ -234,16 +329,36 @@ function readMealsFromFile(username: string): any[] {
       return [];
     }
   } catch (err) {
-    console.error(`Lỗi khi đọc file lich_su_an_uong_${username}.json:`, err);
+    console.error(`Lỗi khi đọc file lich_su_an_uong_${safeUsername}.json:`, err);
     return getInitialSeededMeals();
   }
 }
 
+async function writeMeals(username: string, meals: any[]): Promise<void> {
+  const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
+  
+  if (db) {
+    try {
+      await db.collection("meals").doc(safeUsername).set({ meals });
+    } catch (error) {
+      console.error(`Lỗi khi ghi meals lên Firestore cho ${username}, ghi xuống file cục bộ:`, error);
+      writeMealsLocal(safeUsername, meals);
+    }
+  } else {
+    writeMealsLocal(safeUsername, meals);
+  }
+}
+
+function writeMealsLocal(safeUsername: string, meals: any[]): void {
+  const filePath = path.join(dataDir, `lich_su_an_uong_${safeUsername}.json`);
+  fs.writeFileSync(filePath, JSON.stringify(meals, null, 2), "utf-8");
+}
+
 // 2. Endpoint: Lấy tất cả lịch sử ăn uống
-app.get("/api/meals", (req, res) => {
+app.get("/api/meals", async (req, res) => {
   try {
     const username = (req.headers["x-username"] as string) || "default";
-    const meals = readMealsFromFile(username);
+    const meals = await readMealsFromFile(username);
     return res.json(meals);
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Không thể đọc dữ liệu lịch sử ăn uống." });
@@ -251,16 +366,14 @@ app.get("/api/meals", (req, res) => {
 });
 
 // 3. Endpoint: Cập nhật toàn bộ/Lưu bữa ăn mới vào lịch sử ăn uống
-app.post("/api/meals", (req, res) => {
+app.post("/api/meals", async (req, res) => {
   try {
     const username = (req.headers["x-username"] as string) || "default";
     const { meals } = req.body;
     if (!Array.isArray(meals)) {
       return res.status(400).json({ error: "Dữ liệu gửi lên phải là một danh sách bữa ăn." });
     }
-    const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
-    const filePath = path.join(dataDir, `lich_su_an_uong_${safeUsername}.json`);
-    fs.writeFileSync(filePath, JSON.stringify(meals, null, 2), "utf-8");
+    await writeMeals(username, meals);
     return res.json({ success: true, count: meals.length });
   } catch (error: any) {
     console.error("Lỗi khi ghi file lịch sử ăn uống:", error);
@@ -269,9 +382,29 @@ app.post("/api/meals", (req, res) => {
 });
 
 // Helper function to read user-specific dynamic goal
-function readGoalFromFile(username: string): any {
+async function readGoalFromFile(username: string): Promise<any> {
+  const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
+  
+  if (db) {
+    try {
+      const doc = await db.collection("goals").doc(safeUsername).get();
+      if (doc.exists) {
+        return doc.data();
+      }
+      const defaultGoal = readGoalLocal(safeUsername);
+      await db.collection("goals").doc(safeUsername).set(defaultGoal);
+      return defaultGoal;
+    } catch (error) {
+      console.error(`Lỗi khi đọc goal từ Firestore cho ${username}, chuyển sang file:`, error);
+      return readGoalLocal(safeUsername);
+    }
+  } else {
+    return readGoalLocal(safeUsername);
+  }
+}
+
+function readGoalLocal(safeUsername: string): any {
   try {
-    const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
     const filePath = path.join(dataDir, `muc_tieu_${safeUsername}.json`);
     if (fs.existsSync(filePath)) {
       const fileData = fs.readFileSync(filePath, "utf-8");
@@ -282,16 +415,36 @@ function readGoalFromFile(username: string): any {
       return defaultGoal;
     }
   } catch (err) {
-    console.error(`Lỗi khi đọc file muc_tieu_${username}.json:`, err);
+    console.error(`Lỗi khi đọc file muc_tieu_${safeUsername}.json:`, err);
     return { calories: 1800, protein: 120, carb: 200, fat: 55 };
   }
 }
 
+async function writeGoal(username: string, goal: any): Promise<void> {
+  const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
+  
+  if (db) {
+    try {
+      await db.collection("goals").doc(safeUsername).set(goal);
+    } catch (error) {
+      console.error(`Lỗi khi ghi goal lên Firestore cho ${username}, ghi xuống file cục bộ:`, error);
+      writeGoalLocal(safeUsername, goal);
+    }
+  } else {
+    writeGoalLocal(safeUsername, goal);
+  }
+}
+
+function writeGoalLocal(safeUsername: string, goal: any): void {
+  const filePath = path.join(dataDir, `muc_tieu_${safeUsername}.json`);
+  fs.writeFileSync(filePath, JSON.stringify(goal, null, 2), "utf-8");
+}
+
 // 4. Endpoint: Lấy mục tiêu dinh dưỡng cá nhân
-app.get("/api/goal", (req, res) => {
+app.get("/api/goal", async (req, res) => {
   try {
     const username = (req.headers["x-username"] as string) || "default";
-    const goal = readGoalFromFile(username);
+    const goal = await readGoalFromFile(username);
     return res.json(goal);
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Không thể đọc dữ liệu mục tiêu dinh dưỡng." });
@@ -299,19 +452,17 @@ app.get("/api/goal", (req, res) => {
 });
 
 // 5. Endpoint: Cập nhật mục tiêu dinh dưỡng cá nhân
-app.post("/api/goal", (req, res) => {
+app.post("/api/goal", async (req, res) => {
   try {
     const username = (req.headers["x-username"] as string) || "default";
     const { goal } = req.body;
     if (!goal || typeof goal.calories !== "number") {
       return res.status(400).json({ error: "Dữ liệu mục tiêu dinh dưỡng không đúng cấu trúc." });
     }
-    const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
-    const filePath = path.join(dataDir, `muc_tieu_${safeUsername}.json`);
-    fs.writeFileSync(filePath, JSON.stringify(goal, null, 2), "utf-8");
+    await writeGoal(username, goal);
     return res.json({ success: true, goal });
   } catch (error: any) {
-    console.error("Lỗi khi ghi file mục tiêu dinh dưỡng:", error);
+    console.error("Lỗi khi ghi mục tiêu dinh dưỡng:", error);
     return res.status(500).json({ error: error.message || "Không thể lưu mục tiêu dinh dưỡng." });
   }
 });

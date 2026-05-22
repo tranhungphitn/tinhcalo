@@ -56,6 +56,29 @@ try {
     });
     db = admin.firestore();
     console.log("Khởi tạo Firebase Admin SDK thành công.");
+
+    // Kiểm tra kết nối Firestore bất đồng bộ khi khởi động để cảnh báo nếu chưa tạo DB
+    db.collection("custom_foods").doc("shared").get()
+      .then(() => {
+        console.log("Kết nối tới Firestore thành công và sẵn sàng hoạt động!");
+      })
+      .catch((err: any) => {
+        if (err && err.code === 5) {
+          console.error("\n=================================================================================");
+          console.error("CẢNH BÁO LỚN: Firestore Database chưa được khởi tạo trên project Firebase!");
+          console.error("Lý do: Lỗi 5 NOT_FOUND từ Google Cloud API.");
+          console.error("Cách khắc phục:");
+          console.error("1. Truy cập: https://console.firebase.google.com/");
+          console.error("2. Chọn dự án 'tinhcalo'.");
+          console.error("3. Chọn 'Firestore Database' ở thanh menu bên trái (dưới mục Build).");
+          console.error("4. Nhấp vào nút 'Create database' (Tạo cơ sở dữ liệu).");
+          console.error("5. Chọn chế độ (Test mode hoặc Production mode) và vị trí (Khuyên dùng: asia-southeast1 - Singapore).");
+          console.error("6. Đợi tạo xong và khởi động lại server.");
+          console.error("=================================================================================\n");
+        } else {
+          console.error("Lỗi khi kết nối thử Firestore:", err.message || err);
+        }
+      });
   } else {
     console.log("Không tìm thấy cấu hình FIREBASE_SERVICE_ACCOUNT hay file key cục bộ. Sử dụng chế độ lưu file JSON cục bộ.");
   }
@@ -107,6 +130,17 @@ function getDefaultFoods(): any[] {
   ];
 }
 
+function handleFirestoreError(action: string, error: any) {
+  if (error && error.code === 5) {
+    console.error(`\n[FIRESTORE LỖI 5 - NOT_FOUND] khi thực hiện ${action}.`);
+    console.error("Cơ sở dữ liệu Firestore chưa được tạo trong Firebase Console cho project này!");
+    console.error("-> Vui lòng mở Firebase Console (https://console.firebase.google.com/), chọn dự án của bạn,");
+    console.error("   vào 'Firestore Database' ở thanh menu bên trái, và click 'Create database'.");
+  } else {
+    console.error(`Lỗi Firestore khi thực hiện ${action}:`, error);
+  }
+}
+
 // Read custom foods from JSON file specific to a user or Firestore
 async function readCustomFoodsFromFile(username: string): Promise<any[]> {
   const safeUsername = "shared";
@@ -135,7 +169,7 @@ async function readCustomFoodsFromFile(username: string): Promise<any[]> {
       await db.collection("custom_foods").doc(safeUsername).set({ foods: defaultFoods });
       return defaultFoods;
     } catch (error) {
-      console.error(`Lỗi khi đọc custom_foods từ Firestore cho ${username}, chuyển sang file:`, error);
+      handleFirestoreError(`đọc custom_foods cho ${username}`, error);
       return readCustomFoodsLocal(safeUsername);
     }
   } else {
@@ -178,7 +212,7 @@ async function writeCustomFoods(username: string, customFoods: any[]): Promise<v
     try {
       await db.collection("custom_foods").doc(safeUsername).set({ foods: customFoods });
     } catch (error) {
-      console.error(`Lỗi khi ghi custom_foods lên Firestore cho ${username}, ghi xuống file cục bộ:`, error);
+      handleFirestoreError(`ghi custom_foods cho ${username}`, error);
       writeCustomFoodsLocal(safeUsername, customFoods);
     }
   } else {
@@ -353,7 +387,7 @@ async function readMealsFromFile(username: string): Promise<any[]> {
       await db.collection("meals").doc(safeUsername).set({ meals: defaultMeals });
       return defaultMeals;
     } catch (error) {
-      console.error(`Lỗi khi đọc meals từ Firestore cho ${username}, chuyển sang file:`, error);
+      handleFirestoreError(`đọc meals cho ${username}`, error);
       return readMealsLocal(safeUsername);
     }
   } else {
@@ -384,7 +418,7 @@ async function writeMeals(username: string, meals: any[]): Promise<void> {
     try {
       await db.collection("meals").doc(safeUsername).set({ meals });
     } catch (error) {
-      console.error(`Lỗi khi ghi meals lên Firestore cho ${username}, ghi xuống file cục bộ:`, error);
+      handleFirestoreError(`ghi meals cho ${username}`, error);
       writeMealsLocal(safeUsername, meals);
     }
   } else {
@@ -438,7 +472,7 @@ async function readGoalFromFile(username: string): Promise<any> {
       await db.collection("goals").doc(safeUsername).set(defaultGoal);
       return defaultGoal;
     } catch (error) {
-      console.error(`Lỗi khi đọc goal từ Firestore cho ${username}, chuyển sang file:`, error);
+      handleFirestoreError(`đọc goal cho ${username}`, error);
       return readGoalLocal(safeUsername);
     }
   } else {
@@ -470,7 +504,7 @@ async function writeGoal(username: string, goal: any): Promise<void> {
     try {
       await db.collection("goals").doc(safeUsername).set(goal);
     } catch (error) {
-      console.error(`Lỗi khi ghi goal lên Firestore cho ${username}, ghi xuống file cục bộ:`, error);
+      handleFirestoreError(`ghi goal cho ${username}`, error);
       writeGoalLocal(safeUsername, goal);
     }
   } else {

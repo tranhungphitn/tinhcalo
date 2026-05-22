@@ -142,6 +142,7 @@ export default function App() {
 
       try {
         const res = await fetch("/api/meals", {
+          cache: "no-store",
           headers: { "x-username": currentUser.username }
         });
         if (res.ok) {
@@ -186,6 +187,7 @@ export default function App() {
 
       try {
         const res = await fetch("/api/custom-foods", {
+          cache: "no-store",
           headers: { "x-username": currentUser.username }
         });
         if (res.ok) {
@@ -239,6 +241,7 @@ export default function App() {
 
       try {
         const res = await fetch("/api/goal", {
+          cache: "no-store",
           headers: { "x-username": currentUser.username }
         });
         if (res.ok) {

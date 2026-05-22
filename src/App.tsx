@@ -1348,15 +1348,9 @@ export default function App() {
 
 
       {/* FOOTER METADATA INFOPANEL */}
-      <footer className="bg-white border-t border-slate-200 py-8 text-slate-400 mt-16 text-center text-xs">
-        <div className="max-w-7xl mx-auto px-4 space-y-2">
-          <p className="font-semibold text-slate-500">
-            Ứng dụng hỗ trợ dinh dưỡng thông minh sử dụng Gemini 3.5 Flash API
-          </p>
-          <p className="max-w-2xl mx-auto text-slate-400/80 leading-relaxed">
-            Mọi tính toán hàm lượng calo, protein, carb, fat đều lấy từ các cơ sở dữ liệu dinh dưỡng lớn được tích hợp trong mô hình AI và mang tính chất tham khảo tin cậy cao cho vận động viên, người tập thể hình hoặc kiểm soát cân nặng.
-          </p>
-          <div className="pt-2 flex items-center justify-center gap-4 text-emerald-600 font-bold">
+      <footer className="bg-white border-t border-slate-200 py-6 text-slate-400 mt-16 text-center text-xs">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-center gap-4 text-slate-400 font-medium">
             <span>Phiên bản v1.1.0</span>
             <span>•</span>
             <span>Bảo mật thiết bị ngoại tuyến</span>

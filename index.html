@@ -14,12 +14,38 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
+      // Clear legacy service worker caches programmatically on page load to prevent cache intercept bugs
+      if ("caches" in window) {
+        caches.keys().then((keys) => {
+          keys.forEach((key) => {
+            if (key !== "tinhcalo-cache-v2") {
+              caches.delete(key).then(() => {
+                console.log("[Service Worker Cache] Cleaned up legacy cache database:", key);
+              });
+            }
+          });
+        });
+      }
+
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js")
-            .then((reg) => console.log("[Service Worker] Registered successfully:", reg.scope))
+            .register("/sw.js?v=2")
+            .then((reg) => {
+              console.log("[Service Worker] Registered successfully:", reg.scope);
+              // Proactively check for updates on reload
+              reg.update();
+            })
             .catch((err) => console.error("[Service Worker] Registration failed:", err));
+        });
+
+        // Trigger page reload when the new service worker activates and takes control
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
         });
       }
     </script>

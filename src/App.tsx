@@ -147,21 +147,33 @@ export default function App() {
         });
         if (res.ok) {
           const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            setMeals(data);
-            localStorage.setItem(localMealsKey, JSON.stringify(data));
-          } else if (localMealsList.length > 0) {
-            // Server không có dữ liệu (có thể do Vercel restart), đồng bộ ngược từ LocalStorage lên Server
-            await fetch("/api/meals", {
-              method: "POST",
-              headers: { 
-                "Content-Type": "application/json",
-                "x-username": currentUser.username
-              },
-              body: JSON.stringify({ meals: localMealsList })
+          if (Array.isArray(data)) {
+            // Reconcile client and server meals: merge by ID to prevent overwriting with older data on serverless container restart
+            const mergedMeals = [...data];
+            const serverIds = new Set(data.map((m) => m.id));
+            let hasNewClientMeals = false;
+
+            localMealsList.forEach((lm) => {
+              if (lm && lm.id && !serverIds.has(lm.id)) {
+                mergedMeals.push(lm);
+                hasNewClientMeals = true;
+              }
             });
-          } else {
-            setMeals([]);
+
+            setMeals(mergedMeals);
+            localStorage.setItem(localMealsKey, JSON.stringify(mergedMeals));
+
+            // Sync merged list back to server if client had local unsaved additions
+            if (hasNewClientMeals || (data.length === 0 && localMealsList.length > 0)) {
+              await fetch("/api/meals", {
+                method: "POST",
+                headers: { 
+                  "Content-Type": "application/json",
+                  "x-username": currentUser.username
+                },
+                body: JSON.stringify({ meals: mergedMeals })
+              });
+            }
           }
         }
       } catch (err) {
@@ -191,19 +203,30 @@ export default function App() {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data)) {
-            // Cập nhật state & local
-            setCustomFoods(data);
-            localStorage.setItem(localCustomKey, JSON.stringify(data));
+            // Reconcile client and server custom foods: merge by ID to prevent losing items on Vercel container restarts
+            const mergedFoods = [...data];
+            const serverIds = new Set(data.map((f) => f.id));
+            let hasNewClientFoods = false;
 
-            // Nếu server rỗng nhưng local có dữ liệu, đồng bộ ngược lên server
-            if (data.length === 0 && localCustomList.length > 0) {
+            localCustomList.forEach((lf) => {
+              if (lf && lf.id && !serverIds.has(lf.id)) {
+                mergedFoods.push(lf);
+                hasNewClientFoods = true;
+              }
+            });
+
+            setCustomFoods(mergedFoods);
+            localStorage.setItem(localCustomKey, JSON.stringify(mergedFoods));
+
+            // Sync merged list back to server if client had local custom foods not yet persisted on server
+            if (hasNewClientFoods || (data.length === 0 && localCustomList.length > 0)) {
               await fetch("/api/custom-foods", {
                 method: "POST",
                 headers: { 
                   "Content-Type": "application/json",
                   "x-username": currentUser.username
                 },
-                body: JSON.stringify({ customFoods: localCustomList })
+                body: JSON.stringify({ customFoods: mergedFoods })
               });
             }
           }

@@ -170,7 +170,7 @@ export default function App() {
     fetchMeals();
 
     const fetchCustomFoods = async () => {
-      const localCustomKey = `macro_tracker_custom_foods_${currentUser.username}`;
+      const localCustomKey = "macro_tracker_custom_foods_shared";
       const localCustomStr = localStorage.getItem(localCustomKey);
       let localCustomList: CustomFood[] = [];
       if (localCustomStr) {
@@ -388,7 +388,7 @@ export default function App() {
     if (!currentUser) return;
 
     // Save to localStorage immediately for instant local persistence
-    const localCustomKey = `macro_tracker_custom_foods_${currentUser.username}`;
+    const localCustomKey = "macro_tracker_custom_foods_shared";
     localStorage.setItem(localCustomKey, JSON.stringify(updatedFoods));
 
     try {

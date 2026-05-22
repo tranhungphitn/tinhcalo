@@ -9,7 +9,7 @@ interface CustomFoodsManagerProps {
   username?: string;
 }
 
-export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, isAdmin = false, username = "default" }: CustomFoodsManagerProps) {
+export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, isAdmin = true, username = "default" }: CustomFoodsManagerProps) {
   const [name, setName] = useState("");
   const [servingSize, setServingSize] = useState("100g");
   const [calories, setCalories] = useState<number | "">("");
@@ -208,22 +208,8 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
       
       {/* LEFT COLUMN: ADD FOOD FORM */}
       <div className="col-span-1 lg:col-span-1 bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between h-fit">
-        {!isAdmin ? (
-          <div className="text-center py-10 px-4 flex flex-col justify-center items-center h-full min-h-[300px]">
-            <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center text-amber-500 mb-4">
-              <Info className="w-6 h-6 text-amber-500" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-800">Chế độ Chỉ xem</h3>
-            <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-              Tài khoản của bạn chỉ được phép xem danh mục thực phẩm này nhằm tra cứu khi lên thực đơn dinh dưỡng.
-            </p>
-            <p className="text-[10px] text-amber-600 font-extrabold mt-4 bg-amber-50/70 border border-amber-100 px-3 py-1.5 rounded-xl uppercase tracking-wider">
-              Chỉ ADMIN (phi) mới có quyền quản lý
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleAddFood} className="space-y-4">
-            <div className="flex items-center gap-2.5 mb-2">
+        <form onSubmit={handleAddFood} className="space-y-4">
+          <div className="flex items-center gap-2.5 mb-2">
               <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
                 <Utensils className="w-5 h-5 text-emerald-500 animate-pulse" />
               </div>
@@ -350,7 +336,6 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
               </button>
             </div>
           </form>
-        )}
 
         {/* Informative Tip */}
         <div className="mt-6 bg-emerald-500/5 rounded-2xl p-4 border border-emerald-500/10 flex gap-3 text-slate-600 text-xs leading-relaxed">
@@ -407,7 +392,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                     <th className="py-3 px-2 text-center text-emerald-600">🥩 Đạm</th>
                     <th className="py-3 px-2 text-center text-sky-600">🍚 Carb</th>
                     <th className="py-3 px-2 text-center text-rose-500">🧈 Béo</th>
-                    {isAdmin && <th className="py-3 px-4 text-center">Hành động</th>}
+                    <th className="py-3 px-4 text-center">Hành động</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-[11px] text-slate-600 font-medium">
@@ -494,7 +479,6 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                           )}
                         </td>
 
-                        {isAdmin && (
                           <td className="py-3 px-4 text-center">
                             <div className="flex items-center justify-center gap-1.5">
                               {isEditing ? (
@@ -537,7 +521,6 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                               )}
                             </div>
                           </td>
-                        )}
                       </tr>
                     );
                   })}

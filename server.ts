@@ -78,7 +78,7 @@ function getInitialSeededCustomFoods(): any[] {
 
 // Read custom foods from JSON file specific to a user or Firestore
 async function readCustomFoodsFromFile(username: string): Promise<any[]> {
-  const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
+  const safeUsername = "shared";
   
   if (db) {
     try {
@@ -129,7 +129,7 @@ function readCustomFoodsLocal(safeUsername: string): any[] {
 }
 
 async function writeCustomFoods(username: string, customFoods: any[]): Promise<void> {
-  const safeUsername = String(username || "default").replace(/[^a-zA-Z0-9_-]/g, "");
+  const safeUsername = "shared";
   
   if (db) {
     try {

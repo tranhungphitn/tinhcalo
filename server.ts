@@ -28,9 +28,11 @@ app.use("/api", (req, res, next) => {
 // Initialize Firebase Admin if Service Account is provided
 let db: admin.firestore.Firestore | null = null;
 try {
+  let serviceAccount: any = null;
   const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+  const localKeyPath = path.join(process.cwd(), "tinhcalo-firebase-adminsdk-fbsvc-7fae173a88.json");
+
   if (serviceAccountJson) {
-    let serviceAccount: any;
     try {
       if (serviceAccountJson.trim().startsWith("{")) {
         serviceAccount = JSON.parse(serviceAccountJson);
@@ -42,16 +44,20 @@ try {
       console.error("Lỗi khi parse FIREBASE_SERVICE_ACCOUNT. Thử parse trực tiếp...", e);
       serviceAccount = JSON.parse(serviceAccountJson);
     }
+  } else if (fs.existsSync(localKeyPath)) {
+    console.log(`Tìm thấy file key Firebase cục bộ tại: ${localKeyPath}`);
+    const fileContent = fs.readFileSync(localKeyPath, "utf-8");
+    serviceAccount = JSON.parse(fileContent);
+  }
 
-    if (serviceAccount) {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-      });
-      db = admin.firestore();
-      console.log("Khởi tạo Firebase Admin SDK thành công.");
-    }
+  if (serviceAccount) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    db = admin.firestore();
+    console.log("Khởi tạo Firebase Admin SDK thành công.");
   } else {
-    console.log("Không tìm thấy cấu hình FIREBASE_SERVICE_ACCOUNT. Sử dụng chế độ lưu file JSON cục bộ.");
+    console.log("Không tìm thấy cấu hình FIREBASE_SERVICE_ACCOUNT hay file key cục bộ. Sử dụng chế độ lưu file JSON cục bộ.");
   }
 } catch (error) {
   console.error("Lỗi khi khởi tạo Firebase Admin SDK:", error);

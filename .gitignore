@@ -12,3 +12,5 @@ thuc_pham_thuong_an*.json
 lich_su_an_uong*.json
 muc_tieu_*.json
 
+# Firebase credentials
+*firebase-adminsdk*.json

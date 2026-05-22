@@ -34,7 +34,7 @@ import {
 export default function App() {
   // --- Auth States ---
   const [currentUser, setCurrentUser] = useState<{ username: string; name: string; role: string } | null>(() => {
-    const saved = localStorage.getItem("macro_tracker_user");
+    const saved = localStorage.getItem("macro_tracker_user") || sessionStorage.getItem("macro_tracker_user");
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -44,8 +44,15 @@ export default function App() {
     }
     return null;
   });
-  const [loginUsername, setLoginUsername] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
+  const [loginUsername, setLoginUsername] = useState(() => {
+    return localStorage.getItem("macro_tracker_remembered_username") || "";
+  });
+  const [loginPassword, setLoginPassword] = useState(() => {
+    return localStorage.getItem("macro_tracker_remembered_password") || "";
+  });
+  const [rememberMe, setRememberMe] = useState(() => {
+    return localStorage.getItem("macro_tracker_remember_me") === "true";
+  });
   const [loginError, setLoginError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -253,7 +260,18 @@ export default function App() {
           name: data.name,
           role: data.role
         };
-        localStorage.setItem("macro_tracker_user", JSON.stringify(userObj));
+        if (rememberMe) {
+          localStorage.setItem("macro_tracker_user", JSON.stringify(userObj));
+          localStorage.setItem("macro_tracker_remember_me", "true");
+          localStorage.setItem("macro_tracker_remembered_username", loginUsername);
+          localStorage.setItem("macro_tracker_remembered_password", loginPassword);
+        } else {
+          sessionStorage.setItem("macro_tracker_user", JSON.stringify(userObj));
+          localStorage.setItem("macro_tracker_remember_me", "false");
+          localStorage.removeItem("macro_tracker_user");
+          localStorage.removeItem("macro_tracker_remembered_username");
+          localStorage.removeItem("macro_tracker_remembered_password");
+        }
         setCurrentUser(userObj);
       } else {
         setLoginError(data.error || "Tên đăng nhập hoặc mật khẩu không chính xác.");
@@ -268,9 +286,12 @@ export default function App() {
 
   const handleLogout = () => {
     localStorage.removeItem("macro_tracker_user");
+    sessionStorage.removeItem("macro_tracker_user");
     setCurrentUser(null);
-    setLoginUsername("");
-    setLoginPassword("");
+    if (!rememberMe) {
+      setLoginUsername("");
+      setLoginPassword("");
+    }
     setLoginError("");
   };
 
@@ -577,6 +598,18 @@ export default function App() {
                 onChange={(e) => setLoginPassword(e.target.value)}
                 required
               />
+            </div>
+
+            <div className="flex items-center justify-start py-1">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="rounded-sm border-slate-350 text-emerald-600 focus:ring-emerald-500/30 w-3.5 h-3.5 cursor-pointer accent-emerald-500"
+                />
+                <span className="text-[11px] font-bold text-slate-500">Ghi nhớ mật khẩu & tự động đăng nhập</span>
+              </label>
             </div>
 
             <button

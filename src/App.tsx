@@ -590,18 +590,21 @@ export default function App() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden font-sans">
-        {/* Abstract design elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/3 translate-x-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3"></div>
+      <div className="min-h-screen w-full bg-[url('/login_background.png')] bg-cover bg-center flex items-center justify-center p-4 relative overflow-hidden font-sans">
+        {/* Soft overlay to make text highly readable */}
+        <div className="absolute inset-0 bg-white/25 backdrop-blur-[3px] z-0"></div>
         
-        <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-2xl border border-slate-100 w-full max-w-md relative z-10 animate-fade-in text-slate-800">
+        {/* Decorative bright lights */}
+        <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-400/20 rounded-full blur-3xl z-0 pointer-events-none"></div>
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-teal-400/20 rounded-full blur-3xl z-0 pointer-events-none"></div>
+        
+        <div className="bg-white/90 backdrop-blur-xl rounded-[32px] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-white/60 w-full max-w-md relative z-10 animate-fade-in text-slate-800">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-emerald-100 shadow-xs">
-              <ChefHat className="w-9 h-9 text-emerald-500 animate-pulse" />
+            <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-teal-500 text-white rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/25">
+              <ChefHat className="w-9 h-9 text-white" />
             </div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Cổng Đăng Nhập</h1>
-            <p className="text-xs text-slate-400 mt-1 font-medium">Chọn tài khoản mặc định hoặc nhập tay để theo dõi dinh dưỡng</p>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight bg-gradient-to-r from-emerald-600 to-teal-700 bg-clip-text text-transparent">Nhật Ký Dinh Dưỡng</h1>
+            <p className="text-xs text-slate-500 mt-1.5 font-bold uppercase tracking-wider">Health & Fitness Tracker</p>
           </div>
 
           {loginError && (
@@ -611,13 +614,13 @@ export default function App() {
             </div>
           )}
 
-          <form onSubmit={handleLoginSubmit} className="space-y-4">
+          <form onSubmit={handleLoginSubmit} className="space-y-4.5">
             <div>
-              <label className="text-[10px] font-extrabold text-slate-500 block mb-1.5 uppercase tracking-wider">Tên đăng nhập (phi / tuyen)</label>
+              <label className="text-[10px] font-extrabold text-slate-400 block mb-1.5 uppercase tracking-wider">Tên đăng nhập (phi / tuyen)</label>
               <input
                 type="text"
                 placeholder="Nhập 'phi' hoặc 'tuyen'"
-                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-2xl px-4 py-3 text-xs text-slate-700 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-emerald-400/20 font-bold transition-all text-center lowercase"
+                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-2xl px-4 py-3 text-xs text-slate-750 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-emerald-400/20 font-bold transition-all text-center lowercase"
                 value={loginUsername}
                 onChange={(e) => setLoginUsername(e.target.value)}
                 required
@@ -625,11 +628,11 @@ export default function App() {
             </div>
 
             <div>
-              <label className="text-[10px] font-extrabold text-slate-500 block mb-1.5 uppercase tracking-wider">Mật khẩu</label>
+              <label className="text-[10px] font-extrabold text-slate-400 block mb-1.5 uppercase tracking-wider">Mật khẩu</label>
               <input
                 type="password"
                 placeholder="••••••"
-                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-2xl px-4 py-3 text-xs text-slate-700 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-emerald-400/20 font-bold transition-all text-center tracking-widest text-slate-800"
+                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-500 rounded-2xl px-4 py-3 text-xs text-slate-750 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-emerald-400/20 font-bold transition-all text-center tracking-widest text-slate-800"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 required
@@ -674,7 +677,7 @@ export default function App() {
                   setLoginUsername("phi");
                   setLoginPassword("123");
                 }}
-                className="p-2.5 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 border border-slate-100 rounded-xl transition-all text-center cursor-pointer block text-left"
+                className="p-2.5 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-250 border border-slate-100 rounded-xl transition-all text-center cursor-pointer block text-left"
               >
                 <p className="text-xs font-bold text-slate-800 leading-none">phi (Admin)</p>
                 <p className="text-[9px] text-slate-400 mt-1 uppercase">Quản lý thực phẩm</p>
@@ -686,10 +689,10 @@ export default function App() {
                   setLoginUsername("tuyen");
                   setLoginPassword("123");
                 }}
-                className="p-2.5 bg-slate-50 hover:bg-amber-50 hover:border-amber-200 border border-slate-100 rounded-xl transition-all text-center cursor-pointer block text-left"
+                className="p-2.5 bg-slate-50 hover:bg-teal-50 hover:border-teal-250 border border-slate-100 rounded-xl transition-all text-center cursor-pointer block text-left"
               >
                 <p className="text-xs font-bold text-slate-800 leading-none">tuyen (User)</p>
-                <p className="text-[9px] text-slate-400 mt-1 uppercase">Chế độ Chỉ Xem</p>
+                <p className="text-[9px] text-slate-400 mt-1 uppercase">Dùng chung dữ liệu</p>
               </button>
             </div>
           </div>

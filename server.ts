@@ -68,7 +68,7 @@ function readCustomFoodsFromFile(): any[] {
   }
 }
 
-// 1. Endpoint: Trích xuất thông tin dinh dưỡng từ mô tả đồ ăn (có ưu tiên Cơ sở dữ liệu thường ăn cá nhân trước, rồi cá biệt hóa internet sau)
+// 1. Endpoint: Trích xuất thông tin dinh dưỡng từ mô tả đồ ăn (có ưu tiên Dữ liệu Thức Ăn cá nhân trước, rồi cá biệt hóa internet sau)
 app.post("/api/macros/extract", async (req, res) => {
   try {
     const { description } = req.body;
@@ -82,7 +82,7 @@ app.post("/api/macros/extract", async (req, res) => {
     let customFoodsPromptPart = "";
     if (customFoods && customFoods.length > 0) {
       customFoodsPromptPart = `
-DƯỚI ĐÂY LÀ DANH SÁCH THỰC PHẨM CÁ NHÂN CỦA NGƯỜI DÙNG (CƠ SỞ DỮ LIỆU NỘI BỘ THỨC ĂN KHÁCH HÀNG THƯỜNG ĂN):
+DƯỚI ĐÂY LÀ DANH SÁCH THỰC PHẨM CÁ NHÂN CỦA NGƯỜI DÙNG (CƠ SỞ DỮ LIỆU NỘI BỘ DỮ LIỆU THỨC ĂN KHÁCH HÀNG THƯỜNG ĂN):
 ${customFoods.map((f: any) => `- ${f.name} (${f.servingSize}): ${f.calories} kcal, ${f.protein}g đạm, ${f.carb}g carb, ${f.fat}g béo`).join("\n")}
 
 Nhiệm vụ đặc biệt quan trọng (ƯU TIÊN TUYỆT ĐỐI SỐ 1 - TRONG CƠ SỞ DỮ LIỆU CÁ NHÂN):
@@ -154,7 +154,7 @@ Nhiệm vụ đặc biệt quan trọng (ƯU TIÊN TUYỆT ĐỐI SỐ 1 - TRONG
   }
 });
 
-// Endpoint: Lấy danh sách thực phẩm thường ăn cá nhân
+// Endpoint: Lấy danh sách Dữ liệu Thức Ăn cá nhân
 app.get("/api/custom-foods", (req, res) => {
   try {
     const list = readCustomFoodsFromFile();
@@ -164,7 +164,7 @@ app.get("/api/custom-foods", (req, res) => {
   }
 });
 
-// Endpoint: Cập nhật danh sách thực phẩm thường ăn cá nhân
+// Endpoint: Cập nhật danh sách Dữ liệu Thức Ăn cá nhân
 app.post("/api/custom-foods", (req, res) => {
   try {
     const username = (req.headers["x-username"] as string) || "default";
@@ -173,13 +173,13 @@ app.post("/api/custom-foods", (req, res) => {
     }
     const { customFoods } = req.body;
     if (!Array.isArray(customFoods)) {
-      return res.status(400).json({ error: "Dữ liệu gửi lên phải là một danh sách thực phẩm thường ăn." });
+      return res.status(400).json({ error: "Dữ liệu gửi lên phải là một danh sách dữ liệu thức ăn." });
     }
     fs.writeFileSync(CUSTOM_FOODS_FILE_PATH, JSON.stringify(customFoods, null, 2), "utf-8");
     return res.json({ success: true, count: customFoods.length });
   } catch (error: any) {
     console.error("Lỗi khi ghi file thuc_pham_thuong_an.json:", error);
-    return res.status(500).json({ error: error.message || "Không thể lưu danh sách thực phẩm thường ăn." });
+    return res.status(500).json({ error: error.message || "Không thể lưu danh sách dữ liệu thức ăn." });
   }
 });
 

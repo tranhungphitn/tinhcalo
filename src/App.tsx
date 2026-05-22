@@ -28,7 +28,10 @@ import {
   Utensils,
   Download,
   FileSpreadsheet,
-  LogIn
+  LogIn,
+  Smartphone,
+  Share,
+  MoreVertical
 } from "lucide-react";
 
 export default function App() {
@@ -60,7 +63,7 @@ export default function App() {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [dailyGoal, setDailyGoal] = useState<DailyGoal>(DEFAULT_GOAL);
   
-  // Navigation tabs: Dinh dưỡng hôm nay, Lịch Sử Ăn Uống, Thực phẩm thường ăn
+  // Navigation tabs: Dinh dưỡng hôm nay, Nhật ký Ăn Uống, Dữ liệu Thức Ăn
   const [activeMainTab, setActiveMainTab] = useState<"nutrition" | "history" | "customFoods">("nutrition");
   const [customFoods, setCustomFoods] = useState<CustomFood[]>([]);
 
@@ -84,6 +87,39 @@ export default function App() {
   // Pagination states
   const [historyPage, setHistoryPage] = useState(1);
   const MEALS_PER_PAGE = 5;
+
+  // PWA states
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+
+  useEffect(() => {
+    // Check if running in standalone mode
+    const checkStandalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone;
+    setIsStandalone(!!checkStandalone);
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User choice outcome for install: ${outcome}`);
+      setDeferredPrompt(null);
+    } else {
+      setShowInstallModal(true);
+    }
+  };
 
   // Load from backend file storage and localStorage on mount/user change
   useEffect(() => {
@@ -691,6 +727,17 @@ export default function App() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3.5 self-start md:self-auto">
+              {!isStandalone && (
+                <button
+                  type="button"
+                  onClick={handleInstallClick}
+                  className="bg-white/10 hover:bg-white/20 active:scale-95 text-white px-3 py-2 rounded-2xl border border-white/10 transition-all cursor-pointer shadow-xs flex items-center gap-1.5 shrink-0 text-xs font-bold"
+                  title="Cài đặt ứng dụng trên điện thoại/máy tính"
+                >
+                  <Smartphone className="w-4 h-4 text-emerald-200" />
+                  <span>Cài đặt App</span>
+                </button>
+              )}
               <div className="flex items-center gap-3 bg-black/15 backdrop-blur-sm px-4 py-2 rounded-2xl border border-white/5 shrink-0 select-none">
                 <div className="w-8 h-8 rounded-full bg-emerald-300 text-emerald-950 font-black flex items-center justify-center text-xs shadow-inner border border-emerald-200 shrink-0 uppercase">
                   {currentUser?.username?.substring(0, 2) || "US"}
@@ -722,40 +769,40 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 py-8" id="application_body">
         
         {/* MAIN TABS BAR */}
-        <div className="flex border-b border-slate-200 mb-8 overflow-x-auto whitespace-nowrap scrollbar-none gap-1 bg-white p-1 rounded-2xl shadow-xs" id="navigation_tabs_wrapper">
+        <div className="flex border-b border-slate-200 mb-6 overflow-x-auto whitespace-nowrap scrollbar-none gap-1 bg-white p-1 rounded-2xl shadow-xs" id="navigation_tabs_wrapper">
           <button
             onClick={() => setActiveMainTab("nutrition")}
-            className={`flex items-center gap-2 px-5 py-3 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 sm:px-5 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold rounded-xl transition-all cursor-pointer ${
               activeMainTab === "nutrition"
                 ? "bg-emerald-600 text-white shadow-xs"
                 : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
             }`}
           >
-            <Apple className="w-4 h-4" />
-            Dinh dưỡng hôm nay
+            <Apple className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>Hôm nay</span>
           </button>
           <button
             onClick={() => setActiveMainTab("history")}
-            className={`flex items-center gap-2 px-5 py-3 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 sm:px-5 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold rounded-xl transition-all cursor-pointer ${
               activeMainTab === "history"
                 ? "bg-emerald-600 text-white shadow-xs"
                 : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
             }`}
           >
-            <Calendar className="w-4 h-4" />
-            Lịch Sử Ăn Uống & Sửa Lỗi
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>Nhật ký Ăn Uống</span>
           </button>
           {currentUser?.username !== "tuyen" && (
             <button
               onClick={() => setActiveMainTab("customFoods")}
-              className={`flex items-center gap-2 px-5 py-3 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 sm:px-5 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold rounded-xl transition-all cursor-pointer ${
                 activeMainTab === "customFoods"
                   ? "bg-emerald-600 text-white shadow-xs"
                   : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
               }`}
             >
-              <Utensils className="w-4 h-4" />
-              Thực phẩm thường ăn (Cơ sở dữ liệu)
+              <Utensils className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Dữ liệu Thức Ăn</span>
             </button>
           )}
         </div>
@@ -972,11 +1019,11 @@ export default function App() {
         <div className="w-full" id="history_section">
           {/* INTERACTIVE HISTORY LOGGER LIST */}
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100" id="meals_history_timeline">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 justify-between border-b border-slate-100 pb-5 mb-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5 mb-5">
                 <div>
                   <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-emerald-500" />
-                    Lịch Sử Ăn Uống & Sữa Lỗi
+                    Nhật ký Ăn Uống
                   </h3>
                   <p className="text-xs text-slate-400 mt-0.5">
                     Quản lý danh sách các món ăn đã nạp gần đây
@@ -1333,6 +1380,81 @@ export default function App() {
                     Xóa ngay
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PWA INSTALLATION MODAL */}
+        {showInstallModal && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in animate-duration-200" id="pwa_install_modal">
+            <div className="bg-white rounded-3xl p-6 shadow-2xl border border-slate-150 w-full max-w-md relative animate-zoom-in animate-duration-200">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <Smartphone className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-800">Cài đặt ứng dụng</h3>
+                    <p className="text-[11px] text-slate-400">Trải nghiệm mượt mà hơn trên màn hình chính</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowInstallModal(false)}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-all cursor-pointer font-bold text-sm font-sans"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-4 my-4">
+                {/iPad|iPhone|iPod/.test(navigator.userAgent) ? (
+                  <div className="space-y-3 text-xs text-slate-600 leading-relaxed">
+                    <p className="font-semibold text-slate-700">Để cài đặt ứng dụng trên iPhone/iPad (Safari):</p>
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                      <div className="flex gap-2.5 items-start">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>
+                        <span>Nhấn vào nút <strong>Chia sẻ</strong> <Share className="inline w-3.5 h-3.5 text-emerald-600 mx-1 mb-0.5 animate-pulse" /> ở thanh menu phía dưới của Safari.</span>
+                      </div>
+                      <div className="flex gap-2.5 items-start">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>
+                        <span>Cuộn xuống dưới và chọn <strong>"Thêm vào MH chính"</strong> (Add to Home Screen).</span>
+                      </div>
+                      <div className="flex gap-2.5 items-start">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>
+                        <span>Nhấn nút <strong>"Thêm"</strong> (Add) ở góc trên bên phải để hoàn tất.</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3 text-xs text-slate-600 leading-relaxed">
+                    <p className="font-semibold text-slate-700">Để cài đặt ứng dụng trên trình duyệt của bạn:</p>
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                      <div className="flex gap-2.5 items-start">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>
+                        <span>Nhấn vào biểu tượng <strong>Tùy chọn</strong> <MoreVertical className="inline w-3.5 h-3.5 text-slate-500 mx-1 mb-0.5" /> (3 chấm) ở góc trên bên phải trình duyệt.</span>
+                      </div>
+                      <div className="flex gap-2.5 items-start">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>
+                        <span>Tìm và chọn <strong>"Cài đặt ứng dụng"</strong> hoặc <strong>"Thêm vào Màn hình chính"</strong>.</span>
+                      </div>
+                      <div className="flex gap-2.5 items-start">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>
+                        <span>Xác nhận cài đặt khi trình duyệt hiển thị hộp thoại.</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowInstallModal(false)}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer border-none text-center shadow-xs"
+                >
+                  Tôi đã hiểu
+                </button>
               </div>
             </div>
           </div>

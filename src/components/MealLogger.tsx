@@ -720,7 +720,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-40 disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-400 text-white font-bold py-3.5 px-6 rounded-2xl text-sm transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
           >
             <Check className="w-5 h-5 text-white" />
-            <span>Lưu Bữa Ăn Vào Lịch Sử</span>
+            <span>Lưu Bữa Ăn Vào Nhật Ký</span>
           </button>
           
           <button

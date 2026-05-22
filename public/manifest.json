@@ -1,0 +1,29 @@
+{
+  "short_name": "TinhCalo",
+  "name": "Tính Calo Dinh Dưỡng",
+  "description": "Ứng dụng tính toán calo, protein, carb, fat từ thực phẩm bằng Gemini AI, lưu nhật ký ăn uống theo tuần/tháng.",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#059669",
+  "display": "standalone",
+  "orientation": "portrait"
+}

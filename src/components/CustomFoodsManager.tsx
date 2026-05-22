@@ -204,7 +204,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                 <Utensils className="w-5 h-5 text-emerald-500 animate-pulse" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-800">Thêm vào Thực phẩm Thường Ăn</h2>
+                <h2 className="text-lg font-bold text-slate-800">Thêm vào Dữ liệu Thức Ăn</h2>
                 <p className="text-[11px] text-slate-400">Các món ăn chế biến riêng hoặc sản phẩm yêu thích của bạn</p>
               </div>
             </div>
@@ -341,7 +341,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
             <div>
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-emerald-500" />
-                Cơ sở dữ liệu Thực Phẩm ({customFoods.length})
+                Cơ sở dữ liệu Thức Ăn ({customFoods.length})
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">Danh sách các món ăn có độ ưu tiên cao nhất của bạn</p>
             </div>
@@ -528,9 +528,9 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
               <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Trash2 className="w-6 h-6 text-rose-500" />
               </div>
-              <h3 className="text-base font-bold text-slate-800 mb-2">Thực phẩm thường ăn</h3>
+              <h3 className="text-base font-bold text-slate-800 mb-2">Dữ liệu thức ăn</h3>
               <p className="text-xs text-slate-500 mb-6 leading-relaxed">
-                Bạn có chắc chắn muốn xóa <strong className="text-slate-700">"{foodToDelete.name}"</strong> khỏi cơ sở dữ liệu thường ăn?
+                Bạn có chắc chắn muốn xóa <strong className="text-slate-700">"{foodToDelete.name}"</strong> khỏi dữ liệu thức ăn?
               </p>
               <div className="flex gap-3 justify-center">
                 <button

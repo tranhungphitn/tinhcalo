@@ -177,8 +177,6 @@ export default function App() {
       if (localCustomStr) {
         try {
           localCustomList = JSON.parse(localCustomStr);
-          // Loại bỏ tất cả dữ liệu mẫu cũ
-          localCustomList = localCustomList.filter(f => !/^(cf-[1-6]|cf-seed-\d+)$/.test(f.id));
           setCustomFoods(localCustomList);
         } catch (e) {
           console.error("Lỗi phân tích custom foods từ localStorage:", e);
@@ -191,16 +189,13 @@ export default function App() {
           headers: { "x-username": currentUser.username }
         });
         if (res.ok) {
-          let data = await res.json();
+          const data = await res.json();
           if (Array.isArray(data)) {
-            // Loại bỏ tất cả dữ liệu mẫu cũ từ server
-            data = data.filter((f: any) => !/^(cf-[1-6]|cf-seed-\d+)$/.test(f.id));
-            
             // Cập nhật state & local
             setCustomFoods(data);
             localStorage.setItem(localCustomKey, JSON.stringify(data));
 
-            // Nếu server rỗng nhưng local sau khi lọc lại có dữ liệu, đồng bộ ngược lên server
+            // Nếu server rỗng nhưng local có dữ liệu, đồng bộ ngược lên server
             if (data.length === 0 && localCustomList.length > 0) {
               await fetch("/api/custom-foods", {
                 method: "POST",

@@ -77,12 +77,28 @@ function getGeminiClient(): GoogleGenAI {
   return geminiClient;
 }
 
-// Path to store custom foods JSON file
-const CUSTOM_FOODS_FILE_PATH = path.join(dataDir, "thuc_pham_thuong_an.json");
+// Path to store seed custom foods JSON file (always project root)
+const GLOBAL_SEED_FOODS_FILE_PATH = path.join(process.cwd(), "thuc_pham_thuong_an.json");
 
-// Helper function to seed initial custom foods if file doesn't exist
-function getInitialSeededCustomFoods(): any[] {
-  return [];
+// Helper function to load default foods
+function getDefaultFoods(): any[] {
+  try {
+    if (fs.existsSync(GLOBAL_SEED_FOODS_FILE_PATH)) {
+      const globalData = fs.readFileSync(GLOBAL_SEED_FOODS_FILE_PATH, "utf-8");
+      return JSON.parse(globalData);
+    }
+  } catch (e) {
+    console.error("Lỗi khi đọc file thuc_pham_thuong_an.json:", e);
+  }
+  // Hardcoded fallback list of 6 standard foods
+  return [
+    { id: "cf-1", name: "Ức gà áp chảo", servingSize: "100g", calories: 165, protein: 31, carb: 0, fat: 3.6 },
+    { id: "cf-2", name: "Trứng gà luộc", servingSize: "1 quả", calories: 75, protein: 6.3, carb: 0.6, fat: 5.3 },
+    { id: "cf-3", name: "Cơm trắng", servingSize: "150g", calories: 195, protein: 4, carb: 42, fat: 0.5 },
+    { id: "cf-4", name: "Thịt thăn bò", servingSize: "100g", calories: 129, protein: 21, carb: 0, fat: 5 },
+    { id: "cf-5", name: "Sữa chua ít đường", servingSize: "1 hũ", calories: 80, protein: 4, carb: 12, fat: 2 },
+    { id: "cf-6", name: "Bột Whey Protein", servingSize: "1 muỗng (30g)", calories: 120, protein: 25, carb: 2, fat: 1.5 }
+  ];
 }
 
 // Read custom foods from JSON file specific to a user or Firestore
@@ -95,7 +111,18 @@ async function readCustomFoodsFromFile(username: string): Promise<any[]> {
       if (doc.exists) {
         const data = doc.data();
         if (data && Array.isArray(data.foods)) {
-          return data.foods;
+          let currentFoods = data.foods;
+          // Nếu danh sách trống hoặc hoàn toàn thiếu các thực phẩm mẫu mặc định (cf-1 -> cf-6)
+          const hasDefaultFoods = currentFoods.some((f: any) => /^(cf-[1-6])$/.test(f.id));
+          if (currentFoods.length === 0 || !hasDefaultFoods) {
+            const defaults = getDefaultFoods();
+            const existingIds = new Set(currentFoods.map((f: any) => f.id));
+            const toAdd = defaults.filter((d: any) => !existingIds.has(d.id));
+            currentFoods = [...toAdd, ...currentFoods];
+            // Tự động cập nhật lại lên Firestore để lưu trữ đồng bộ
+            await db.collection("custom_foods").doc(safeUsername).set({ foods: currentFoods });
+          }
+          return currentFoods;
         }
       }
       const defaultFoods = readCustomFoodsLocal(safeUsername);
@@ -113,27 +140,28 @@ async function readCustomFoodsFromFile(username: string): Promise<any[]> {
 function readCustomFoodsLocal(safeUsername: string): any[] {
   try {
     const filePath = path.join(dataDir, `thuc_pham_thuong_an_${safeUsername}.json`);
+    let currentFoods: any[] = [];
     if (fs.existsSync(filePath)) {
       const fileData = fs.readFileSync(filePath, "utf-8");
-      return JSON.parse(fileData);
+      currentFoods = JSON.parse(fileData);
     } else {
-      let defaultFoods: any[] = [];
-      if (fs.existsSync(CUSTOM_FOODS_FILE_PATH)) {
-        try {
-          const globalData = fs.readFileSync(CUSTOM_FOODS_FILE_PATH, "utf-8");
-          defaultFoods = JSON.parse(globalData);
-        } catch (e) {
-          defaultFoods = getInitialSeededCustomFoods();
-        }
-      } else {
-        defaultFoods = getInitialSeededCustomFoods();
-      }
-      fs.writeFileSync(filePath, JSON.stringify(defaultFoods, null, 2), "utf-8");
-      return defaultFoods;
+      currentFoods = getDefaultFoods();
+      fs.writeFileSync(filePath, JSON.stringify(currentFoods, null, 2), "utf-8");
     }
+
+    // Đảm bảo chứa thực phẩm mặc định trong danh sách cục bộ
+    const hasDefaultFoods = currentFoods.some((f: any) => /^(cf-[1-6])$/.test(f.id));
+    if (currentFoods.length === 0 || !hasDefaultFoods) {
+      const defaults = getDefaultFoods();
+      const existingIds = new Set(currentFoods.map((f: any) => f.id));
+      const toAdd = defaults.filter((d: any) => !existingIds.has(d.id));
+      currentFoods = [...toAdd, ...currentFoods];
+      fs.writeFileSync(filePath, JSON.stringify(currentFoods, null, 2), "utf-8");
+    }
+    return currentFoods;
   } catch (err) {
     console.error(`Lỗi khi đọc file thuc_pham_thuong_an_${safeUsername}.json:`, err);
-    return getInitialSeededCustomFoods();
+    return getDefaultFoods();
   }
 }
 

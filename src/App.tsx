@@ -993,8 +993,8 @@ export default function App() {
                         <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2.5">
                           Chi tiết thành phần bữa ăn:
                         </span>
-                        <div className="bg-white rounded-xl border border-slate-150 overflow-hidden shadow-2xs">
-                          <table className="w-full text-left">
+                        <div className="bg-white rounded-xl border border-slate-150 overflow-x-auto shadow-2xs">
+                          <table className="w-full text-left min-w-[500px]">
                             <thead>
                               <tr className="bg-slate-100 text-[10px] text-slate-500 font-bold border-b border-slate-200">
                                 <th className="py-2 px-3">Tên thực phẩm</th>
@@ -1193,8 +1193,8 @@ export default function App() {
                                   <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2.5">
                                     Chi tiết thành phần nguyên liệu:
                                   </span>
-                                  <div className="bg-white rounded-xl border border-slate-150 overflow-hidden shadow-2xs">
-                                    <table className="w-full text-left">
+                                  <div className="bg-white rounded-xl border border-slate-150 overflow-x-auto shadow-2xs">
+                                    <table className="w-full text-left min-w-[500px]">
                                       <thead>
                                         <tr className="bg-slate-100 text-[10px] text-slate-500 font-bold border-b border-slate-200">
                                           <th className="py-2.5 px-3">Tên thực phẩm</th>

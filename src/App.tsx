@@ -121,25 +121,11 @@ export default function App() {
     }
   };
 
-  // Load from backend file storage and localStorage on mount/user change
+  // Load from backend database on mount/user change
   useEffect(() => {
     if (!currentUser) return;
 
     const fetchMeals = async () => {
-      const localMealsKey = `macro_tracker_meals_${currentUser.username}`;
-      const localMealsStr = localStorage.getItem(localMealsKey);
-      let localMealsList: Meal[] = [];
-      if (localMealsStr) {
-        try {
-          localMealsList = JSON.parse(localMealsStr);
-          if (localMealsList.length > 0) {
-            setMeals(localMealsList);
-          }
-        } catch (e) {
-          console.error("Lỗi phân tích meals từ localStorage:", e);
-        }
-      }
-
       try {
         const res = await fetch("/api/meals", {
           cache: "no-store",
@@ -148,32 +134,7 @@ export default function App() {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data)) {
-            // Reconcile client and server meals: merge by ID to prevent overwriting with older data on serverless container restart
-            const mergedMeals = [...data];
-            const serverIds = new Set(data.map((m) => m.id));
-            let hasNewClientMeals = false;
-
-            localMealsList.forEach((lm) => {
-              if (lm && lm.id && !serverIds.has(lm.id)) {
-                mergedMeals.push(lm);
-                hasNewClientMeals = true;
-              }
-            });
-
-            setMeals(mergedMeals);
-            localStorage.setItem(localMealsKey, JSON.stringify(mergedMeals));
-
-            // Sync merged list back to server if client had local unsaved additions
-            if (hasNewClientMeals || (data.length === 0 && localMealsList.length > 0)) {
-              await fetch("/api/meals", {
-                method: "POST",
-                headers: { 
-                  "Content-Type": "application/json",
-                  "x-username": currentUser.username
-                },
-                body: JSON.stringify({ meals: mergedMeals })
-              });
-            }
+            setMeals(data);
           }
         }
       } catch (err) {
@@ -183,18 +144,6 @@ export default function App() {
     fetchMeals();
 
     const fetchCustomFoods = async () => {
-      const localCustomKey = "macro_tracker_custom_foods_shared";
-      const localCustomStr = localStorage.getItem(localCustomKey);
-      let localCustomList: CustomFood[] = [];
-      if (localCustomStr) {
-        try {
-          localCustomList = JSON.parse(localCustomStr);
-          setCustomFoods(localCustomList);
-        } catch (e) {
-          console.error("Lỗi phân tích custom foods từ localStorage:", e);
-        }
-      }
-
       try {
         const res = await fetch("/api/custom-foods", {
           cache: "no-store",
@@ -203,32 +152,7 @@ export default function App() {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data)) {
-            // Reconcile client and server custom foods: merge by ID to prevent losing items on Vercel container restarts
-            const mergedFoods = [...data];
-            const serverIds = new Set(data.map((f) => f.id));
-            let hasNewClientFoods = false;
-
-            localCustomList.forEach((lf) => {
-              if (lf && lf.id && !serverIds.has(lf.id)) {
-                mergedFoods.push(lf);
-                hasNewClientFoods = true;
-              }
-            });
-
-            setCustomFoods(mergedFoods);
-            localStorage.setItem(localCustomKey, JSON.stringify(mergedFoods));
-
-            // Sync merged list back to server if client had local custom foods not yet persisted on server
-            if (hasNewClientFoods || (data.length === 0 && localCustomList.length > 0)) {
-              await fetch("/api/custom-foods", {
-                method: "POST",
-                headers: { 
-                  "Content-Type": "application/json",
-                  "x-username": currentUser.username
-                },
-                body: JSON.stringify({ customFoods: mergedFoods })
-              });
-            }
+            setCustomFoods(data);
           }
         }
       } catch (err) {
@@ -237,26 +161,8 @@ export default function App() {
     };
     fetchCustomFoods();
 
-    // Specific user goal storage from backend file system
+    // Specific user goal storage from backend database
     const fetchUserGoal = async () => {
-      const localGoalKey = `macro_tracker_goal_${currentUser.username}`;
-      const localGoalStr = localStorage.getItem(localGoalKey);
-      let localGoalObj: DailyGoal | null = null;
-      if (localGoalStr) {
-        try {
-          localGoalObj = JSON.parse(localGoalStr);
-          if (localGoalObj) {
-            setDailyGoal(localGoalObj);
-            setGoalEditingCal(localGoalObj.calories);
-            setGoalEditingProt(localGoalObj.protein);
-            setGoalEditingCarb(localGoalObj.carb);
-            setGoalEditingFat(localGoalObj.fat);
-          }
-        } catch (e) {
-          console.error("Lỗi phân tích mục tiêu từ localStorage:", e);
-        }
-      }
-
       try {
         const res = await fetch("/api/goal", {
           cache: "no-store",
@@ -264,26 +170,12 @@ export default function App() {
         });
         if (res.ok) {
           const parsed = await res.json();
-          const isDefaultServerGoal = parsed.calories === 1800 && parsed.protein === 120 && parsed.carb === 200 && parsed.fat === 55;
           if (parsed && typeof parsed.calories === "number") {
-            if (!isDefaultServerGoal || !localGoalObj) {
-              setDailyGoal(parsed);
-              setGoalEditingCal(parsed.calories);
-              setGoalEditingProt(parsed.protein);
-              setGoalEditingCarb(parsed.carb);
-              setGoalEditingFat(parsed.fat);
-              localStorage.setItem(localGoalKey, JSON.stringify(parsed));
-            } else if (localGoalObj && isDefaultServerGoal) {
-              // Server bị reset về mặc định nhưng client có cấu hình riêng, đồng bộ ngược lên server
-              await fetch("/api/goal", {
-                method: "POST",
-                headers: { 
-                  "Content-Type": "application/json",
-                  "x-username": currentUser.username
-                },
-                body: JSON.stringify({ goal: localGoalObj })
-              });
-            }
+            setDailyGoal(parsed);
+            setGoalEditingCal(parsed.calories);
+            setGoalEditingProt(parsed.protein);
+            setGoalEditingCarb(parsed.carb);
+            setGoalEditingFat(parsed.fat);
           }
         }
       } catch (e) {
@@ -359,15 +251,11 @@ export default function App() {
     setHistoryPage(1);
   }, [mealSearchQuery, activeDateFilter]);
 
-  // Sync to database in file storage
+  // Sync to database
   const saveMealsToStorage = async (updatedMeals: Meal[]) => {
     setMeals(updatedMeals);
     if (!currentUser) return;
     
-    // Save to localStorage immediately for instant local persistence
-    const localMealsKey = `macro_tracker_meals_${currentUser.username}`;
-    localStorage.setItem(localMealsKey, JSON.stringify(updatedMeals));
-
     try {
       await fetch("/api/meals", {
         method: "POST",
@@ -386,10 +274,6 @@ export default function App() {
     setDailyGoal(updatedGoal);
     if (!currentUser) return;
 
-    // Save to localStorage immediately for instant local persistence
-    const localGoalKey = `macro_tracker_goal_${currentUser.username}`;
-    localStorage.setItem(localGoalKey, JSON.stringify(updatedGoal));
-
     try {
       await fetch("/api/goal", {
         method: "POST",
@@ -407,10 +291,6 @@ export default function App() {
   const handleUpdateCustomFoods = async (updatedFoods: CustomFood[]) => {
     setCustomFoods(updatedFoods);
     if (!currentUser) return;
-
-    // Save to localStorage immediately for instant local persistence
-    const localCustomKey = "macro_tracker_custom_foods_shared";
-    localStorage.setItem(localCustomKey, JSON.stringify(updatedFoods));
 
     try {
       await fetch("/api/custom-foods", {

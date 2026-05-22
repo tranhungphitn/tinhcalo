@@ -1242,6 +1242,7 @@ export default function App() {
             customFoods={customFoods} 
             onUpdateCustomFoods={handleUpdateCustomFoods} 
             isAdmin={true} 
+            username={currentUser?.username || "default"}
           />
         )}
       </main>

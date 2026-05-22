@@ -6,9 +6,10 @@ interface CustomFoodsManagerProps {
   customFoods: CustomFood[];
   onUpdateCustomFoods: (updated: CustomFood[]) => Promise<void>;
   isAdmin?: boolean;
+  username?: string;
 }
 
-export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, isAdmin = false }: CustomFoodsManagerProps) {
+export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, isAdmin = false, username = "default" }: CustomFoodsManagerProps) {
   const [name, setName] = useState("");
   const [servingSize, setServingSize] = useState("100g");
   const [calories, setCalories] = useState<number | "">("");
@@ -31,6 +32,54 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const [foodToDelete, setFoodToDelete] = useState<CustomFood | null>(null);
+
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
+
+  const handleAutoFillMacros = async () => {
+    if (!name.trim()) {
+      setErrorMsg("Vui lòng nhập Tên thực phẩm trước khi tra cứu AI.");
+      return;
+    }
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setIsAutoFilling(true);
+
+    try {
+      const descriptionQuery = servingSize.trim() 
+        ? `${servingSize.trim()} ${name.trim()}` 
+        : name.trim();
+
+      const response = await fetch("/api/macros/extract", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-username": username
+        },
+        body: JSON.stringify({ description: descriptionQuery })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Không thể lấy dữ liệu macro từ AI.");
+      }
+
+      const data = await response.json();
+      if (data.total) {
+        setCalories(data.total.calories || 0);
+        setProtein(data.total.protein || 0);
+        setCarb(data.total.carb || 0);
+        setFat(data.total.fat || 0);
+        setSuccessMsg(`Đã tự động điền dinh dưỡng cho "${name.trim()}"!`);
+        setTimeout(() => setSuccessMsg(null), 3000);
+      } else {
+        throw new Error("Dữ liệu phản hồi từ AI không đúng định dạng.");
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "Gặp sự cố khi kết nối với AI.");
+    } finally {
+      setIsAutoFilling(false);
+    }
+  };
 
   const handleAddFood = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,6 +258,18 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                   onChange={(e) => setName(e.target.value)}
                   required
                 />
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={handleAutoFillMacros}
+                  disabled={isAutoFilling}
+                  className="w-full bg-amber-50/70 hover:bg-amber-100/80 border border-dashed border-amber-300 hover:border-amber-400 text-amber-800 disabled:bg-slate-50 disabled:border-slate-200 disabled:text-slate-400 text-[11px] font-bold py-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-3xs"
+                >
+                  <Sparkles className={`w-3.5 h-3.5 text-amber-600 ${isAutoFilling ? "animate-pulse" : ""}`} />
+                  <span>{isAutoFilling ? "Đang tra cứu AI & internet..." : "Tra cứu & Điền nhanh dinh dưỡng bằng AI"}</span>
+                </button>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

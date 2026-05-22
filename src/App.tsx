@@ -790,7 +790,7 @@ export default function App() {
             <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Nhật ký Ăn Uống</span>
           </button>
-          {currentUser && (
+          {currentUser && currentUser.username !== "tuyen" && (
             <button
               onClick={() => setActiveMainTab("customFoods")}
               className={`flex items-center gap-1.5 px-3 sm:px-5 py-2.5 sm:py-3 text-[11px] sm:text-xs font-bold rounded-xl transition-all cursor-pointer ${
@@ -1237,7 +1237,7 @@ export default function App() {
         </div>
       )}
 
-        {activeMainTab === "customFoods" && (
+        {activeMainTab === "customFoods" && currentUser?.username !== "tuyen" && (
           <CustomFoodsManager 
             customFoods={customFoods} 
             onUpdateCustomFoods={handleUpdateCustomFoods} 

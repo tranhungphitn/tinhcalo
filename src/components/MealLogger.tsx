@@ -346,9 +346,6 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
         {/* Form header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5 mb-6">
           <div className="flex-1 min-w-0">
-            <span className="text-[10px] font-bold tracking-widest text-emerald-600 uppercase block mb-1">
-              Ghi chép dinh dưỡng thủ công
-            </span>
             <div className="flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-slate-400 shrink-0" />
               <input
@@ -372,7 +369,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
                 <span className="text-xs font-medium text-slate-500">Giờ ăn:</span>
                 <input
                   type="time"
-                  className="bg-transparent text-xs font-bold text-slate-800 focus:outline-hidden border-none p-0 cursor-pointer w-16"
+                  className="bg-transparent text-xs font-bold text-slate-800 focus:outline-hidden border-none p-0 cursor-pointer w-24"
                   value={mealTime}
                   onChange={(e) => setMealTime(e.target.value)}
                 />

@@ -404,9 +404,9 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
 
         {/* Adding Form Section */}
         <div className="bg-slate-50/70 border border-slate-200/40 rounded-2xl p-4 mb-6">
-          <div className="grid grid-cols-2 md:grid-cols-12 gap-3.5">
+          <div className="grid grid-cols-2 md:grid-cols-[repeat(19,minmax(0,1fr))] gap-2">
             {/* Food Name Search box */}
-            <div className="col-span-2 md:col-span-5 relative">
+            <div className="col-span-2 md:col-span-4 relative">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">
                 Tên thực phẩm
               </label>
@@ -469,13 +469,13 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Calories count */}
-            <div className="col-span-1 md:col-span-1">
+            <div className="col-span-1 md:col-span-3">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-amber-500">
                 Kcal
               </label>
               <input
                 type="number"
-                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-bold text-amber-600 text-center"
+                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-1.5 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-bold text-amber-600 text-center"
                 value={manualCal}
                 onChange={(e) => setManualCal(e.target.value === "" ? "" : Number(e.target.value))}
                 placeholder="0"
@@ -484,14 +484,14 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Protein count */}
-            <div className="col-span-1 md:col-span-1">
+            <div className="col-span-1 md:col-span-3">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-emerald-600">
                 🥩 Đạm
               </label>
               <input
                 type="number"
                 step="0.1"
-                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-semibold text-emerald-600 text-center"
+                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-1.5 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-semibold text-emerald-600 text-center"
                 value={manualProt}
                 onChange={(e) => setManualProt(e.target.value === "" ? "" : Number(e.target.value))}
                 placeholder="0.0"
@@ -500,14 +500,14 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Carb count */}
-            <div className="col-span-1 md:col-span-1">
+            <div className="col-span-1 md:col-span-3">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-sky-600">
                 🍚 Carb
               </label>
               <input
                 type="number"
                 step="0.1"
-                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-semibold text-sky-600 text-center"
+                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-1.5 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-semibold text-sky-600 text-center"
                 value={manualCarb}
                 onChange={(e) => setManualCarb(e.target.value === "" ? "" : Number(e.target.value))}
                 placeholder="0.0"
@@ -516,14 +516,14 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Fat count */}
-            <div className="col-span-1 md:col-span-1">
+            <div className="col-span-1 md:col-span-3">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-rose-500">
                 🧈 Béo
               </label>
               <input
                 type="number"
                 step="0.1"
-                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-semibold text-rose-500 text-center"
+                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-1.5 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-semibold text-rose-500 text-center"
                 value={manualFat}
                 onChange={(e) => setManualFat(e.target.value === "" ? "" : Number(e.target.value))}
                 placeholder="0.0"

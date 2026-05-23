@@ -199,7 +199,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
 
 
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 15;
+  const ITEMS_PER_PAGE = 10;
 
   const filteredFoods = customFoods.filter(f =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

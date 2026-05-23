@@ -22,3 +22,15 @@
     display: none; /* Chrome, Safari and Opera */
   }
 }
+
+/* Hide number input spinners globally to prevent text clipping */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+

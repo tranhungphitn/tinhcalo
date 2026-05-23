@@ -555,7 +555,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
           <div className="lg:col-span-8 flex flex-col justify-between">
             <div className="space-y-3 flex-1">
               <span className="text-xs font-bold text-slate-400 uppercase block tracking-wider">
-                Thành phần trong bữa ăn ({draftItems.length}) (Sửa trực tiếp các dòng dưới đây):
+                Thành phần trong bữa ăn :
               </span>
 
               {draftItems.length === 0 ? (

@@ -858,37 +858,39 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Breakdown table */}
+                      {/* Breakdown list */}
                       {isExpanded && (
-                        <div className="bg-slate-50/50 p-4 border-t border-slate-100 transition-all text-xs">
-                          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2.5">
-                            Chi tiết thành phần bữa ăn:
-                          </span>
-                          <div className="bg-white rounded-xl border border-slate-150 overflow-x-auto shadow-2xs">
-                            <table className="w-full text-left min-w-[500px]">
-                              <thead>
-                                <tr className="bg-slate-100 text-[10px] text-slate-500 font-bold border-b border-slate-200">
-                                  <th className="py-2 px-3">Tên thực phẩm</th>
-                                  <th className="py-2 px-2 text-center">Khối lượng</th>
-                                  <th className="py-2 px-2 text-center text-amber-600">Calo</th>
-                                  <th className="py-2 px-2 text-center text-emerald-600">🥩 Đạm</th>
-                                  <th className="py-2 px-2 text-center text-sky-600">🍚 Carb</th>
-                                  <th className="py-2 px-2 text-center text-rose-500">🧈 Béo</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-slate-100 text-[11px] text-slate-600">
-                                {meal.items.map((item, keyIdx) => (
-                                  <tr key={keyIdx}>
-                                    <td className="py-2 px-3 font-semibold text-slate-700">{item.foodName}</td>
-                                    <td className="py-2 px-2 text-center font-medium text-slate-500">{item.quantity}</td>
-                                    <td className="py-2 px-2 text-center font-bold text-amber-600">{item.calories}</td>
-                                    <td className="py-2 px-2 text-center font-semibold text-emerald-600">{item.protein}g</td>
-                                    <td className="py-2 px-2 text-center font-semibold text-sky-600">{item.carb}g</td>
-                                    <td className="py-2 px-2 text-center font-semibold text-rose-500">{item.fat}g</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                        <div className="bg-slate-50/40 p-4 border-t border-slate-100 transition-all text-xs">
+                          <div className="space-y-2">
+                            {meal.items.map((item, keyIdx) => (
+                              <div
+                                key={keyIdx}
+                                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-2xl border border-slate-150 shadow-3xs hover:bg-slate-50/50 transition-colors"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <span className="font-bold text-slate-700 text-xs block truncate">
+                                    {item.foodName}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">
+                                    Lượng: {item.quantity}
+                                  </span>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                                  <span className="text-[10px] font-extrabold text-amber-600 bg-amber-50/50 px-2 py-0.5 rounded-lg border border-amber-100/50">
+                                    🔥 {item.calories} kcal
+                                  </span>
+                                  <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50/50 px-2 py-0.5 rounded-lg border border-emerald-100/50">
+                                    🥩 {item.protein}g đạm
+                                  </span>
+                                  <span className="text-[10px] font-extrabold text-sky-700 bg-sky-50/50 px-2 py-0.5 rounded-lg border border-sky-100/50">
+                                    🍚 {item.carb}g carb
+                                  </span>
+                                  <span className="text-[10px] font-extrabold text-rose-700 bg-rose-50/50 px-2 py-0.5 rounded-lg border border-rose-100/50">
+                                    🧈 {item.fat}g béo
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       )}
@@ -1063,35 +1065,37 @@ export default function App() {
 
                               {/* Expanded Ingredients breakdown */}
                               {isExpanded && (
-                                <div className="bg-slate-50/50 p-4 border-t border-slate-100 transition-all text-xs">
-                                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2.5">
-                                    Chi tiết thành phần nguyên liệu:
-                                  </span>
-                                  <div className="bg-white rounded-xl border border-slate-150 overflow-x-auto shadow-2xs">
-                                    <table className="w-full text-left min-w-[500px]">
-                                      <thead>
-                                        <tr className="bg-slate-100 text-[10px] text-slate-500 font-bold border-b border-slate-200">
-                                          <th className="py-2.5 px-3">Tên thực phẩm</th>
-                                          <th className="py-2.5 px-2 text-center">Khối lượng</th>
-                                          <th className="py-2.5 px-2 text-center text-amber-600">Calo</th>
-                                          <th className="py-2.5 px-2 text-center text-emerald-600">🥩 Đạm</th>
-                                          <th className="py-2.5 px-2 text-center text-sky-600">🍚 Carb</th>
-                                          <th className="py-2.5 px-2 text-center text-rose-500">🧈 Béo</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="divide-y divide-slate-100 text-[11px] text-slate-600">
-                                        {meal.items.map((item, keyIdx) => (
-                                          <tr key={keyIdx}>
-                                            <td className="py-2 px-3 font-semibold text-slate-700">{item.foodName}</td>
-                                            <td className="py-2 px-2 text-center font-medium text-slate-500">{item.quantity}</td>
-                                            <td className="py-2 px-2 text-center font-bold text-amber-600">{item.calories}</td>
-                                            <td className="py-2 px-2 text-center font-semibold text-emerald-600">{item.protein}g</td>
-                                            <td className="py-2 px-2 text-center font-semibold text-sky-600">{item.carb}g</td>
-                                            <td className="py-2 px-2 text-center font-semibold text-rose-500">{item.fat}g</td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
+                                <div className="bg-slate-50/40 p-4 border-t border-slate-100 transition-all text-xs">
+                                  <div className="space-y-2">
+                                    {meal.items.map((item, keyIdx) => (
+                                      <div
+                                        key={keyIdx}
+                                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white rounded-2xl border border-slate-150 shadow-3xs hover:bg-slate-50/50 transition-colors"
+                                      >
+                                        <div className="min-w-0 flex-1">
+                                          <span className="font-bold text-slate-700 text-xs block truncate">
+                                            {item.foodName}
+                                          </span>
+                                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">
+                                            Lượng: {item.quantity}
+                                          </span>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                                          <span className="text-[10px] font-extrabold text-amber-600 bg-amber-50/50 px-2 py-0.5 rounded-lg border border-amber-100/50">
+                                            🔥 {item.calories} kcal
+                                          </span>
+                                          <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50/50 px-2 py-0.5 rounded-lg border border-emerald-100/50">
+                                            🥩 {item.protein}g đạm
+                                          </span>
+                                          <span className="text-[10px] font-extrabold text-sky-700 bg-sky-50/50 px-2 py-0.5 rounded-lg border border-sky-100/50">
+                                            🍚 {item.carb}g carb
+                                          </span>
+                                          <span className="text-[10px] font-extrabold text-rose-700 bg-rose-50/50 px-2 py-0.5 rounded-lg border border-rose-100/50">
+                                            🧈 {item.fat}g béo
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ))}
                                   </div>
 
                                   <div className="mt-3 flex items-center justify-end text-[10px] text-slate-400 font-medium">

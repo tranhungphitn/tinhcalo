@@ -148,53 +148,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
     );
   }, [draftItems]);
 
-  // Modify draft items individually
-  const handleUpdateItemField = (index: number, field: keyof FoodItem, value: any) => {
-    const updated = [...draftItems];
-    if (field === "calories" || field === "protein" || field === "carb" || field === "fat") {
-      updated[index] = {
-        ...updated[index],
-        [field]: value === "" ? "" : Number(value)
-      };
-    } else if (field === "quantity") {
-      const item = updated[index];
-      const baseSize = item.baseServingSize || item.quantity;
-      const baseCalVal = item.baseCalories !== undefined ? item.baseCalories : Number(item.calories) || 0;
-      const baseProtVal = item.baseProtein !== undefined ? item.baseProtein : Number(item.protein) || 0;
-      const baseCarbVal = item.baseCarb !== undefined ? item.baseCarb : Number(item.carb) || 0;
-      const baseFatVal = item.baseFat !== undefined ? item.baseFat : Number(item.fat) || 0;
 
-      // Calculate scaled values based on quantity change
-      const scaled = calculateScaledMacros(
-        value,
-        baseSize,
-        baseCalVal,
-        baseProtVal,
-        baseCarbVal,
-        baseFatVal
-      );
-
-      updated[index] = {
-        ...item,
-        quantity: value,
-        calories: scaled.calories,
-        protein: scaled.protein,
-        carb: scaled.carb,
-        fat: scaled.fat,
-        baseServingSize: baseSize,
-        baseCalories: baseCalVal,
-        baseProtein: baseProtVal,
-        baseCarb: baseCarbVal,
-        baseFat: baseFatVal
-      };
-    } else {
-      updated[index] = {
-        ...updated[index],
-        [field]: value
-      };
-    }
-    setDraftItems(updated);
-  };
 
   const handleDeleteDraftItem = (index: number) => {
     setDraftItems(draftItems.filter((_, i) => i !== index));
@@ -441,12 +395,11 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
                 Kcal
               </label>
               <input
-                type="number"
-                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-1.5 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-bold text-amber-600 text-center"
+                type="text"
+                readOnly
+                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-1.5 py-2.5 font-bold text-amber-600 text-center cursor-not-allowed select-none"
                 value={manualCal}
-                onChange={(e) => setManualCal(e.target.value === "" ? "" : Number(e.target.value))}
                 placeholder="0"
-                min="0"
               />
             </div>
 
@@ -456,13 +409,11 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
                 🥩 Đạm
               </label>
               <input
-                type="number"
-                step="0.1"
-                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-1.5 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-semibold text-emerald-600 text-center"
-                value={manualProt}
-                onChange={(e) => setManualProt(e.target.value === "" ? "" : Number(e.target.value))}
-                placeholder="0.0"
-                min="0"
+                type="text"
+                readOnly
+                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-1.5 py-2.5 font-semibold text-emerald-600 text-center cursor-not-allowed select-none"
+                value={manualProt !== "" ? `${manualProt}g` : ""}
+                placeholder="0.0g"
               />
             </div>
 
@@ -472,13 +423,11 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
                 🍚 Carb
               </label>
               <input
-                type="number"
-                step="0.1"
-                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-1.5 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-semibold text-sky-600 text-center"
-                value={manualCarb}
-                onChange={(e) => setManualCarb(e.target.value === "" ? "" : Number(e.target.value))}
-                placeholder="0.0"
-                min="0"
+                type="text"
+                readOnly
+                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-1.5 py-2.5 font-semibold text-sky-600 text-center cursor-not-allowed select-none"
+                value={manualCarb !== "" ? `${manualCarb}g` : ""}
+                placeholder="0.0g"
               />
             </div>
 
@@ -488,13 +437,11 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
                 🧈 Béo
               </label>
               <input
-                type="number"
-                step="0.1"
-                className="w-full text-xs bg-white border border-slate-200 rounded-xl px-1.5 py-2.5 focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-hidden font-semibold text-rose-500 text-center"
-                value={manualFat}
-                onChange={(e) => setManualFat(e.target.value === "" ? "" : Number(e.target.value))}
-                placeholder="0.0"
-                min="0"
+                type="text"
+                readOnly
+                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-1.5 py-2.5 font-semibold text-rose-500 text-center cursor-not-allowed select-none"
+                value={manualFat !== "" ? `${manualFat}g` : ""}
+                placeholder="0.0g"
               />
             </div>
 
@@ -546,14 +493,9 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
                         {item.foodName}
                       </td>
                       
-                      {/* Quantity change handles proportion automatic calculations */}
-                      <td className="py-2.5 px-2">
-                        <input
-                          type="text"
-                          value={item.quantity}
-                          onChange={(e) => handleUpdateItemField(idx, "quantity", e.target.value)}
-                          className="bg-transparent border border-slate-200 hover:border-slate-300 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-600 transition-all font-medium"
-                        />
+                      {/* Quantity - Read Only Label */}
+                      <td className="py-2.5 px-2 text-slate-600 font-medium">
+                        {item.quantity}
                       </td>
 
                       {/* Cal */}

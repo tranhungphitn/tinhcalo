@@ -89,7 +89,7 @@ export default function App() {
 
   // Search/Filter Meals states
   const [mealSearchQuery, setMealSearchQuery] = useState("");
-  const [expandedMealId, setExpandedMealId] = useState<string | null>(null);
+  const [collapsedMealIds, setCollapsedMealIds] = useState<string[]>([]);
 
   // Active section view tabs (all on standard single screen, just filtering logs)
   const [activeDateFilter, setActiveDateFilter] = useState<"all" | "today" | "past">("all");
@@ -498,7 +498,9 @@ export default function App() {
   });
 
   const toggleExpandMeal = (id: string) => {
-    setExpandedMealId(expandedMealId === id ? null : id);
+    setCollapsedMealIds((prev) =>
+      prev.includes(id) ? prev.filter((cId) => cId !== id) : [...prev, id]
+    );
   };
 
   if (!currentUser) {
@@ -803,7 +805,7 @@ export default function App() {
             ) : (
               <div className="space-y-3 overflow-y-auto max-h-[600px] pr-1 scrollbar-thin flex-1">
                 {todayMeals.map((meal) => {
-                  const isExpanded = expandedMealId === meal.id;
+                  const isExpanded = !collapsedMealIds.includes(meal.id);
                   const mealTime = new Date(meal.timestamp).toLocaleTimeString("vi-VN", {
                     hour: "2-digit",
                     minute: "2-digit"
@@ -823,7 +825,7 @@ export default function App() {
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-extrabold text-slate-400 shrink-0 uppercase tracking-wider">
+                            <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-lg shrink-0 tracking-wider">
                               ⏰ {mealTime}
                             </span>
                             <h4 className="font-bold text-slate-800 text-xs sm:text-sm truncate pr-2">
@@ -1003,7 +1005,7 @@ export default function App() {
 
                       <div className="space-y-3 pl-1">
                         {groupedMeals[groupDate].map((meal) => {
-                          const isExpanded = expandedMealId === meal.id;
+                          const isExpanded = !collapsedMealIds.includes(meal.id);
                           const mealTime = new Date(meal.timestamp).toLocaleTimeString("vi-VN", {
                             hour: "2-digit",
                             minute: "2-digit"
@@ -1025,7 +1027,7 @@ export default function App() {
                               >
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-bold text-slate-400 shrink-0">
+                                    <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-lg shrink-0 tracking-wider">
                                       ⏰ {mealTime}
                                     </span>
                                     <h4 className="font-bold text-slate-800 text-xs sm:text-sm truncate pr-2">

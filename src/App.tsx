@@ -778,9 +778,6 @@ export default function App() {
                   <Utensils className="w-4.5 h-4.5 text-emerald-500 animate-pulse" />
                   Bữa ăn hôm nay
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Danh sách thực phẩm bạn đã nhập dinh dưỡng trong ngày hôm nay
-                </p>
               </div>
               <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
                 Tổng cộng: {todayMeals.length} bữa ăn

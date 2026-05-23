@@ -198,10 +198,19 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
 
 
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 15;
+
   const filteredFoods = customFoods.filter(f =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     f.servingSize.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const totalItems = filteredFoods.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * ITEMS_PER_PAGE;
+  const paginatedFoods = filteredFoods.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full" id="custom_foods_manager_root">
@@ -368,7 +377,10 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
               className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:outline-hidden pl-10 pr-4 py-2.5 rounded-xl text-xs text-slate-700 placeholder-slate-400 transition-all font-medium"
               placeholder="Tìm nhanh theo tên thực phẩm..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
 
@@ -398,7 +410,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-[11px] text-slate-600 font-medium">
-                    {filteredFoods.map((food) => {
+                    {paginatedFoods.map((food) => {
                       const isEditing = editingId === food.id;
                       return (
                         <tr key={food.id} className="hover:bg-slate-50/40 transition-colors">
@@ -532,7 +544,7 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
 
               {/* Mobile view: Cards list layout */}
               <div className="md:hidden space-y-3.5">
-                {filteredFoods.map((food) => {
+                {paginatedFoods.map((food) => {
                   const isEditing = editingId === food.id;
                   return (
                     <div
@@ -669,6 +681,31 @@ export default function CustomFoodsManager({ customFoods, onUpdateCustomFoods, i
                   );
                 })}
               </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-4 select-none">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={activePage === 1}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all disabled:opacity-40 disabled:hover:bg-slate-100 cursor-pointer border-none"
+                  >
+                    ← Trước
+                  </button>
+                  <span className="text-xs font-bold text-slate-500">
+                    Trang {activePage} / {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={activePage === totalPages}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all disabled:opacity-40 disabled:hover:bg-slate-100 cursor-pointer border-none"
+                  >
+                    Sau →
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>

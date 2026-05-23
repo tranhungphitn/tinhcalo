@@ -406,7 +406,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
         <div className="bg-slate-50/70 border border-slate-200/40 rounded-2xl p-4 mb-6">
           <div className="grid grid-cols-2 md:grid-cols-12 gap-3.5">
             {/* Food Name Search box */}
-            <div className="col-span-2 md:col-span-3 relative">
+            <div className="col-span-2 md:col-span-5 relative">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">
                 Tên thực phẩm
               </label>
@@ -532,14 +532,14 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Add button aligned on the same row */}
-            <div className="col-span-2 md:col-span-3 flex items-end">
+            <div className="col-span-1 md:col-span-1 flex items-end">
               <button
                 onClick={handleAddManualItemToDraft}
                 disabled={!manualName.trim()}
-                className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap"
+                className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-xs h-[38px]"
+                title="Thêm thực phẩm"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Thêm thực phẩm</span>
+                <Plus className="w-5 h-5 text-white shrink-0" />
               </button>
             </div>
           </div>

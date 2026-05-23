@@ -404,14 +404,9 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
 
         {/* Adding Form Section */}
         <div className="bg-slate-50/70 border border-slate-200/40 rounded-2xl p-4 mb-6">
-          <div className="flex items-center gap-1.5 mb-3">
-            <div className="w-1.5 h-3.5 bg-emerald-500 rounded-full"></div>
-            <span className="text-xs font-bold text-slate-700">Tìm kiếm hoặc Nhập thực phẩm mới</span>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-3.5">
+          <div className="grid grid-cols-2 md:grid-cols-12 gap-3.5">
             {/* Food Name Search box */}
-            <div className="col-span-2 md:col-span-1 relative">
+            <div className="col-span-2 md:col-span-3 relative">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">
                 Tên thực phẩm
               </label>
@@ -460,7 +455,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Serving Size quantity */}
-            <div>
+            <div className="col-span-1 md:col-span-2">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">
                 Lượng
               </label>
@@ -474,7 +469,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Calories count */}
-            <div>
+            <div className="col-span-1 md:col-span-1">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-amber-500">
                 Kcal
               </label>
@@ -489,9 +484,9 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Protein count */}
-            <div>
+            <div className="col-span-1 md:col-span-1">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-emerald-600">
-                🥩 Đạm (g)
+                🥩 Đạm
               </label>
               <input
                 type="number"
@@ -505,9 +500,9 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Carb count */}
-            <div>
+            <div className="col-span-1 md:col-span-1">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-sky-600">
-                🍚 Carb (g)
+                🍚 Carb
               </label>
               <input
                 type="number"
@@ -521,9 +516,9 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Fat count */}
-            <div>
-              <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-rose-500 font-bold">
-                🧈 Béo (g)
+            <div className="col-span-1 md:col-span-1">
+              <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-rose-500">
+                🧈 Béo
               </label>
               <input
                 type="number"
@@ -535,207 +530,201 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
                 min="0"
               />
             </div>
-          </div>
 
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={handleAddManualItemToDraft}
-              disabled={!manualName.trim()}
-              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Thêm thực phẩm</span>
-            </button>
+            {/* Add button aligned on the same row */}
+            <div className="col-span-2 md:col-span-3 flex items-end">
+              <button
+                onClick={handleAddManualItemToDraft}
+                disabled={!manualName.trim()}
+                className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Thêm thực phẩm</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Ingredients and Totals on the same row */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch mb-6">
-          {/* Current Foods in draft table */}
-          <div className="lg:col-span-8 flex flex-col justify-between">
-            <div className="space-y-3 flex-1">
-              <span className="text-xs font-bold text-slate-400 uppercase block tracking-wider">
-                Thành phần trong bữa ăn :
-              </span>
+        {/* Current Foods in draft table */}
+        <div className="space-y-3 mb-6 flex-1">
+          <span className="text-xs font-bold text-slate-400 uppercase block tracking-wider">
+            Thành phần trong bữa ăn :
+          </span>
 
-              {draftItems.length === 0 ? (
-                <div className="text-center py-10 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center p-4">
-                  <Calendar className="w-8 h-8 text-slate-300 mb-2" />
-                  <p className="text-xs text-slate-500 font-medium">Bữa ăn này chưa có thực phẩm nào.</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">Vui lòng nhập tìm thực phẩm ở bảng trên để thêm vào.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto border border-slate-100 rounded-2xl">
-                  <table className="w-full text-left text-xs text-slate-600">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold">
-                        <th className="py-3 px-3 w-1/4">Tên thực phẩm</th>
-                        <th className="py-3 px-2 w-1/6">Lượng</th>
-                        <th className="py-3 px-1 w-1/12 text-center text-amber-500">Kcal</th>
-                        <th className="py-3 px-1 w-1/12 text-center text-emerald-600">🥩 Đạm</th>
-                        <th className="py-3 px-1 w-1/12 text-center text-sky-600">🍚 Carb</th>
-                        <th className="py-3 px-1 w-1/12 text-center text-rose-500">🧈 Fat</th>
-                        <th className="py-3 pr-3 w-[50px]"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {draftItems.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/50 transition-all">
-                          {/* Name with inline suggestions row */}
-                          <td className="py-2.5 px-3 relative">
-                            <input
-                              type="text"
-                              value={item.foodName}
-                              onChange={(e) => {
-                                handleUpdateItemField(idx, "foodName", e.target.value);
-                                setActiveRowIdx(idx);
-                                setShowRowSuggestions(true);
-                              }}
-                              onFocus={() => {
-                                setActiveRowIdx(idx);
-                                setShowRowSuggestions(true);
-                              }}
-                              onBlur={() => {
-                                setTimeout(() => {
-                                  setShowRowSuggestions(false);
-                                }, 200);
-                              }}
-                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-700 font-bold transition-all"
-                            />
-                            
-                            {/* Auto suggestions dropdown for this table row */}
-                            {showRowSuggestions && activeRowIdx === idx && getRowFilteredFoods(item.foodName).length > 0 && (
-                              <div className="absolute left-3 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-40 overflow-y-auto w-64 divide-y divide-slate-100 p-1">
-                                {getRowFilteredFoods(item.foodName).map((food) => (
-                                  <button
-                                    key={food.id}
-                                    type="button"
-                                    onMouseDown={() => {
-                                      handleSelectCustomFoodForTableRow(idx, food);
-                                    }}
-                                    className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-50 hover:text-emerald-800 transition-colors text-xs flex justify-between items-center rounded-lg"
-                                  >
-                                    <div className="min-w-0 flex-1">
-                                      <div className="font-bold text-slate-700 truncate">{food.name}</div>
-                                      <div className="text-[10px] text-slate-400">Suất: {food.servingSize}</div>
-                                    </div>
-                                    <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded-full text-slate-500 font-semibold shrink-0 ml-1">
-                                      {food.calories} kcal
-                                    </span>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </td>
-                          
-                          {/* Quantity change handles proportion automatic calculations */}
-                          <td className="py-2.5 px-2">
-                            <input
-                              type="text"
-                              value={item.quantity}
-                              onChange={(e) => handleUpdateItemField(idx, "quantity", e.target.value)}
-                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-600 transition-all font-medium"
-                            />
-                          </td>
-
-                          {/* Cal */}
-                          <td className="py-2.5 px-1 text-center font-bold">
-                            <input
-                              type="number"
-                              value={item.calories}
-                              onChange={(e) => handleUpdateItemField(idx, "calories", e.target.value)}
-                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-amber-600 font-bold"
-                              min="0"
-                            />
-                          </td>
-
-                          {/* Protein */}
-                          <td className="py-2.5 px-1 text-center font-semibold">
-                            <input
-                              type="number"
-                              step="0.1"
-                              value={item.protein}
-                              onChange={(e) => handleUpdateItemField(idx, "protein", e.target.value)}
-                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-emerald-600 font-semibold"
-                              min="0"
-                            />
-                          </td>
-
-                          {/* Carb */}
-                          <td className="py-2.5 px-1 text-center font-semibold">
-                            <input
-                              type="number"
-                              step="0.1"
-                              value={item.carb}
-                              onChange={(e) => handleUpdateItemField(idx, "carb", e.target.value)}
-                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-sky-600 font-semibold"
-                              min="0"
-                            />
-                          </td>
-
-                          {/* Fat */}
-                          <td className="py-2.5 px-1 text-center font-semibold">
-                            <input
-                              type="number"
-                              step="0.1"
-                              value={item.fat}
-                              onChange={(e) => handleUpdateItemField(idx, "fat", e.target.value)}
-                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-rose-500 font-semibold"
-                              min="0"
-                            />
-                          </td>
-
-                          {/* Row Delete button */}
-                          <td className="py-2.5 pr-3 text-right">
-                            <button
-                              onClick={() => handleDeleteDraftItem(idx)}
-                              className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
-                              title="Xóa thực phẩm"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+          {draftItems.length === 0 ? (
+            <div className="text-center py-10 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center p-4">
+              <Calendar className="w-8 h-8 text-slate-300 mb-2" />
+              <p className="text-xs text-slate-500 font-medium">Bữa ăn này chưa có thực phẩm nào.</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Vui lòng nhập tìm thực phẩm ở bảng trên để thêm vào.</p>
             </div>
-          </div>
+          ) : (
+            <div className="overflow-x-auto border border-slate-100 rounded-2xl">
+              <table className="w-full text-left text-xs text-slate-600">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold">
+                    <th className="py-3 px-3 w-1/4">Tên thực phẩm</th>
+                    <th className="py-3 px-2 w-1/6">Lượng</th>
+                    <th className="py-3 px-1 w-1/12 text-center text-amber-500">Kcal</th>
+                    <th className="py-3 px-1 w-1/12 text-center text-emerald-600">🥩 Đạm</th>
+                    <th className="py-3 px-1 w-1/12 text-center text-sky-600">🍚 Carb</th>
+                    <th className="py-3 px-1 w-1/12 text-center text-rose-500">🧈 Fat</th>
+                    <th className="py-3 pr-3 w-[50px]"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {draftItems.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/50 transition-all">
+                      {/* Name with inline suggestions row */}
+                      <td className="py-2.5 px-3 relative">
+                        <input
+                          type="text"
+                          value={item.foodName}
+                          onChange={(e) => {
+                            handleUpdateItemField(idx, "foodName", e.target.value);
+                            setActiveRowIdx(idx);
+                            setShowRowSuggestions(true);
+                          }}
+                          onFocus={() => {
+                            setActiveRowIdx(idx);
+                            setShowRowSuggestions(true);
+                          }}
+                          onBlur={() => {
+                            setTimeout(() => {
+                              setShowRowSuggestions(false);
+                            }, 200);
+                          }}
+                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-700 font-bold transition-all"
+                        />
+                        
+                        {/* Auto suggestions dropdown for this table row */}
+                        {showRowSuggestions && activeRowIdx === idx && getRowFilteredFoods(item.foodName).length > 0 && (
+                          <div className="absolute left-3 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-40 overflow-y-auto w-64 divide-y divide-slate-100 p-1">
+                            {getRowFilteredFoods(item.foodName).map((food) => (
+                              <button
+                                key={food.id}
+                                type="button"
+                                onMouseDown={() => {
+                                  handleSelectCustomFoodForTableRow(idx, food);
+                                }}
+                                className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-50 hover:text-emerald-800 transition-colors text-xs flex justify-between items-center rounded-lg"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-bold text-slate-700 truncate">{food.name}</div>
+                                  <div className="text-[10px] text-slate-400">Suất: {food.servingSize}</div>
+                                </div>
+                                <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded-full text-slate-500 font-semibold shrink-0 ml-1">
+                                  {food.calories} kcal
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                      
+                      {/* Quantity change handles proportion automatic calculations */}
+                      <td className="py-2.5 px-2">
+                        <input
+                          type="text"
+                          value={item.quantity}
+                          onChange={(e) => handleUpdateItemField(idx, "quantity", e.target.value)}
+                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-600 transition-all font-medium"
+                        />
+                      </td>
 
-          {/* Sum total preview panel */}
-          <div className="lg:col-span-4 bg-slate-50 rounded-3xl p-5 border border-slate-100 flex flex-col justify-between">
-            <div>
-              <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase block mb-4 flex items-center gap-1.5">
-                <span>📊 Tổng cộng bữa ăn tạm tính:</span>
-              </span>
-              <div className="grid grid-cols-2 gap-3 text-slate-700">
-                <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
-                  <p className="text-[9px] text-slate-400 font-bold uppercase">CALORIES</p>
-                  <p className="text-sm font-extrabold text-amber-500 mt-0.5">
-                    {Math.round(totalCalculated.calories)} kcal
-                  </p>
-                </div>
-                <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
-                  <p className="text-[9px] text-emerald-600 font-bold uppercase">🥩 PROTEIN</p>
-                  <p className="text-sm font-extrabold text-emerald-600 mt-0.5">
-                    {Math.round(totalCalculated.protein * 10) / 10}g
-                  </p>
-                </div>
-                <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
-                  <p className="text-[9px] text-sky-600 font-bold uppercase">🍚 CARB</p>
-                  <p className="text-sm font-extrabold text-sky-600 mt-0.5">
-                    {Math.round(totalCalculated.carb * 10) / 10}g
-                  </p>
-                </div>
-                <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
-                  <p className="text-[9px] text-rose-500 font-bold uppercase">🧈 FAT</p>
-                  <p className="text-sm font-extrabold text-rose-500 mt-0.5">
-                    {Math.round(totalCalculated.fat * 10) / 10}g
-                  </p>
-                </div>
-              </div>
+                      {/* Cal */}
+                      <td className="py-2.5 px-1 text-center font-bold">
+                        <input
+                          type="number"
+                          value={item.calories}
+                          onChange={(e) => handleUpdateItemField(idx, "calories", e.target.value)}
+                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-amber-600 font-bold"
+                          min="0"
+                        />
+                      </td>
+
+                      {/* Protein */}
+                      <td className="py-2.5 px-1 text-center font-semibold">
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={item.protein}
+                          onChange={(e) => handleUpdateItemField(idx, "protein", e.target.value)}
+                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-emerald-600 font-semibold"
+                          min="0"
+                        />
+                      </td>
+
+                      {/* Carb */}
+                      <td className="py-2.5 px-1 text-center font-semibold">
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={item.carb}
+                          onChange={(e) => handleUpdateItemField(idx, "carb", e.target.value)}
+                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-sky-600 font-semibold"
+                          min="0"
+                        />
+                      </td>
+
+                      {/* Fat */}
+                      <td className="py-2.5 px-1 text-center font-semibold">
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={item.fat}
+                          onChange={(e) => handleUpdateItemField(idx, "fat", e.target.value)}
+                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-rose-500 font-semibold"
+                          min="0"
+                        />
+                      </td>
+
+                      {/* Row Delete button */}
+                      <td className="py-2.5 pr-3 text-right">
+                        <button
+                          onClick={() => handleDeleteDraftItem(idx)}
+                          className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
+                          title="Xóa thực phẩm"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Sum total preview panel */}
+        <div className="bg-slate-50 rounded-2xl p-4.5 border border-slate-100 my-6">
+          <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase block mb-2">
+            📊 Tổng cộng bữa ăn tạm tính:
+          </span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-slate-700">
+            <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
+              <p className="text-[10px] text-slate-400 font-bold uppercase">CALORIES</p>
+              <p className="text-base font-extrabold text-amber-500 mt-0.5">
+                {Math.round(totalCalculated.calories)} kcal
+              </p>
+            </div>
+            <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
+              <p className="text-[10px] text-emerald-600 font-bold uppercase">🥩 PROTEIN</p>
+              <p className="text-base font-extrabold text-emerald-600 mt-0.5">
+                {Math.round(totalCalculated.protein * 10) / 10}g
+              </p>
+            </div>
+            <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
+              <p className="text-[10px] text-sky-600 font-bold uppercase">🍚 CARB</p>
+              <p className="text-base font-extrabold text-sky-600 mt-0.5">
+                {Math.round(totalCalculated.carb * 10) / 10}g
+              </p>
+            </div>
+            <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
+              <p className="text-[10px] text-rose-500 font-bold uppercase">🧈 FAT</p>
+              <p className="text-base font-extrabold text-rose-500 mt-0.5">
+                {Math.round(totalCalculated.fat * 10) / 10}g
+              </p>
             </div>
           </div>
         </div>

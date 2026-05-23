@@ -595,7 +595,7 @@ export default function App() {
         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
         <div className="absolute -left-10 bottom-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-2xl pointer-events-none"></div>
 
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-3 sm:py-4 relative z-10">
+        <div className="w-[90%] mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 relative z-10">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
               <div className="p-2 sm:p-3 bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/10 shadow-inner shrink-0">
@@ -650,7 +650,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="w-full px-4 sm:px-6 lg:px-8 py-8" id="application_body">
+      <main className="w-[90%] mx-auto px-4 sm:px-6 lg:px-8 py-8" id="application_body">
         
         {/* MAIN TABS BAR */}
         <div className="flex border-b border-slate-200 mb-6 overflow-x-auto whitespace-nowrap scrollbar-none gap-1 bg-white p-1 rounded-2xl shadow-xs" id="navigation_tabs_wrapper">
@@ -1352,7 +1352,7 @@ export default function App() {
 
       {/* FOOTER METADATA INFOPANEL */}
       <footer className="bg-white border-t border-slate-200 py-6 text-slate-400 mt-16 text-center text-xs">
-        <div className="w-full px-4">
+        <div className="w-[90%] mx-auto px-4">
           <div className="flex items-center justify-center gap-4 text-slate-400 font-medium">
             <span>Phiên bản v1.1.0</span>
             <span>•</span>

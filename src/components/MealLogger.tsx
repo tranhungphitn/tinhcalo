@@ -88,8 +88,6 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
 
   // Autocomplete support
   const [showManualSuggestions, setShowManualSuggestions] = useState(false);
-  const [activeRowIdx, setActiveRowIdx] = useState<number | null>(null);
-  const [showRowSuggestions, setShowRowSuggestions] = useState(false);
 
   // Match custom foods for input "manualName"
   const manualFilteredFoods = React.useMemo(() => {
@@ -99,15 +97,6 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
       food.name.toLowerCase().includes(query)
     ).slice(0, 6);
   }, [manualName, customFoods]);
-
-  // Match custom foods for a specific row in the table
-  const getRowFilteredFoods = (queryText: string) => {
-    if (!queryText || !queryText.trim() || !customFoods) return [];
-    const query = queryText.toLowerCase().trim();
-    return customFoods.filter((food) =>
-      food.name.toLowerCase().includes(query)
-    ).slice(0, 6);
-  };
 
   const handleSelectCustomFoodForManual = (food: CustomFood) => {
     setManualName(food.name);
@@ -143,26 +132,6 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
       setManualCarb(scaled.carb);
       setManualFat(scaled.fat);
     }
-  };
-
-  const handleSelectCustomFoodForTableRow = (index: number, food: CustomFood) => {
-    const updated = [...draftItems];
-    updated[index] = {
-      foodName: food.name,
-      quantity: food.servingSize || "100g",
-      calories: food.calories,
-      protein: food.protein,
-      carb: food.carb,
-      fat: food.fat,
-      baseServingSize: food.servingSize || "100g",
-      baseCalories: food.calories,
-      baseProtein: food.protein,
-      baseCarb: food.carb,
-      baseFat: food.fat
-    };
-    setDraftItems(updated);
-    setShowRowSuggestions(false);
-    setActiveRowIdx(null);
   };
 
   // Sum drafted values
@@ -560,63 +529,21 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
               <table className="w-full text-left text-xs text-slate-600">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold">
-                    <th className="py-3 px-3 w-1/4">Tên thực phẩm</th>
-                    <th className="py-3 px-2 w-1/6">Lượng</th>
-                    <th className="py-3 px-1 w-1/12 text-center text-amber-500">Kcal</th>
-                    <th className="py-3 px-1 w-1/12 text-center text-emerald-600">🥩 Đạm</th>
-                    <th className="py-3 px-1 w-1/12 text-center text-sky-600">🍚 Carb</th>
-                    <th className="py-3 px-1 w-1/12 text-center text-rose-500">🧈 Fat</th>
-                    <th className="py-3 pr-3 w-[50px]"></th>
+                    <th className="py-3 px-3 w-[40%]">Tên thực phẩm</th>
+                    <th className="py-3 px-2 w-[20%]">Lượng</th>
+                    <th className="py-3 px-1 w-[10%] text-center text-amber-500">Kcal</th>
+                    <th className="py-3 px-1 w-[8%] text-center text-emerald-600">🥩 Đạm</th>
+                    <th className="py-3 px-1 w-[8%] text-center text-sky-600">🍚 Carb</th>
+                    <th className="py-3 px-1 w-[8%] text-center text-rose-500">🧈 Béo</th>
+                    <th className="py-3 pr-3 w-[6%]"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {draftItems.map((item, idx) => (
                     <tr key={idx} className="hover:bg-slate-50/50 transition-all">
-                      {/* Name with inline suggestions row */}
-                      <td className="py-2.5 px-3 relative">
-                        <input
-                          type="text"
-                          value={item.foodName}
-                          onChange={(e) => {
-                            handleUpdateItemField(idx, "foodName", e.target.value);
-                            setActiveRowIdx(idx);
-                            setShowRowSuggestions(true);
-                          }}
-                          onFocus={() => {
-                            setActiveRowIdx(idx);
-                            setShowRowSuggestions(true);
-                          }}
-                          onBlur={() => {
-                            setTimeout(() => {
-                              setShowRowSuggestions(false);
-                            }, 200);
-                          }}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-700 font-bold transition-all"
-                        />
-                        
-                        {/* Auto suggestions dropdown for this table row */}
-                        {showRowSuggestions && activeRowIdx === idx && getRowFilteredFoods(item.foodName).length > 0 && (
-                          <div className="absolute left-3 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-40 overflow-y-auto w-64 divide-y divide-slate-100 p-1">
-                            {getRowFilteredFoods(item.foodName).map((food) => (
-                              <button
-                                key={food.id}
-                                type="button"
-                                onMouseDown={() => {
-                                  handleSelectCustomFoodForTableRow(idx, food);
-                                }}
-                                className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-50 hover:text-emerald-800 transition-colors text-xs flex justify-between items-center rounded-lg"
-                              >
-                                <div className="min-w-0 flex-1">
-                                  <div className="font-bold text-slate-700 truncate">{food.name}</div>
-                                  <div className="text-[10px] text-slate-400">Suất: {food.servingSize}</div>
-                                </div>
-                                <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded-full text-slate-500 font-semibold shrink-0 ml-1">
-                                  {food.calories} kcal
-                                </span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                      {/* Name - Read Only Label */}
+                      <td className="py-2.5 px-3 font-bold text-slate-700 max-w-[200px] truncate">
+                        {item.foodName}
                       </td>
                       
                       {/* Quantity change handles proportion automatic calculations */}
@@ -625,55 +552,28 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
                           type="text"
                           value={item.quantity}
                           onChange={(e) => handleUpdateItemField(idx, "quantity", e.target.value)}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-600 transition-all font-medium"
+                          className="bg-transparent border border-slate-200 hover:border-slate-300 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-600 transition-all font-medium"
                         />
                       </td>
 
                       {/* Cal */}
-                      <td className="py-2.5 px-1 text-center font-bold">
-                        <input
-                          type="number"
-                          value={item.calories}
-                          onChange={(e) => handleUpdateItemField(idx, "calories", e.target.value)}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-amber-600 font-bold"
-                          min="0"
-                        />
+                      <td className="py-2.5 px-1 text-center font-bold text-amber-600">
+                        {item.calories}
                       </td>
 
                       {/* Protein */}
-                      <td className="py-2.5 px-1 text-center font-semibold">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={item.protein}
-                          onChange={(e) => handleUpdateItemField(idx, "protein", e.target.value)}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-emerald-600 font-semibold"
-                          min="0"
-                        />
+                      <td className="py-2.5 px-1 text-center font-semibold text-emerald-600">
+                        {item.protein}g
                       </td>
 
                       {/* Carb */}
-                      <td className="py-2.5 px-1 text-center font-semibold">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={item.carb}
-                          onChange={(e) => handleUpdateItemField(idx, "carb", e.target.value)}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-sky-600 font-semibold"
-                          min="0"
-                        />
+                      <td className="py-2.5 px-1 text-center font-semibold text-sky-600">
+                        {item.carb}g
                       </td>
 
                       {/* Fat */}
-                      <td className="py-2.5 px-1 text-center font-semibold">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={item.fat}
-                          onChange={(e) => handleUpdateItemField(idx, "fat", e.target.value)}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-rose-500 font-semibold"
-                          min="0"
-                        />
+                      <td className="py-2.5 px-1 text-center font-semibold text-rose-500">
+                        {item.fat}g
                       </td>
 
                       {/* Row Delete button */}

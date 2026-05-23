@@ -325,8 +325,8 @@ app.get("/api/custom-foods", async (req, res) => {
 
 // Endpoint: Cập nhật danh sách Dữ liệu Thức Ăn cá nhân
 app.post("/api/custom-foods", async (req, res) => {
+  const username = (req.headers["x-username"] as string) || "default";
   try {
-    const username = (req.headers["x-username"] as string) || "default";
     const { customFoods } = req.body;
     if (!Array.isArray(customFoods)) {
       return res.status(400).json({ error: "Dữ liệu gửi lên phải là một danh sách dữ liệu thức ăn." });

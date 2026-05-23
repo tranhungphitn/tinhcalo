@@ -54,6 +54,15 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
   const [draftMealName, setDraftMealName] = useState("Bữa ăn dinh dưỡng");
   const [draftItems, setDraftItems] = useState<FoodItem[]>([]);
 
+  // Datepicker storing "YYYY-MM-DD" (default to current date)
+  const [mealDate, setMealDate] = useState(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  });
+
   // Timepicker storing "HH:MM" (default to current time)
   const [mealTime, setMealTime] = useState(() => {
     const now = new Date();
@@ -263,8 +272,12 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
 
     const calculatedTotals = getTotals();
 
-    // Reconstruct ISO timestamp with locked Current Date, but hours and minutes from state
+    // Reconstruct ISO timestamp with selected Date, hours and minutes from state
     const now = new Date();
+    if (mealDate) {
+      const [year, month, day] = mealDate.split("-");
+      now.setFullYear(Number(year), Number(month) - 1, Number(day));
+    }
     if (mealTime) {
       const [hours, minutes] = mealTime.split(":");
       now.setHours(Number(hours || 0));
@@ -299,8 +312,13 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
     setDraftMealName("Bữa ăn dinh dưỡng");
     setDraftItems([]);
     
-    // reset mealTime to current time
+    // reset mealDate and mealTime to current date/time
     const resetNow = new Date();
+    const year = resetNow.getFullYear();
+    const month = String(resetNow.getMonth() + 1).padStart(2, "0");
+    const day = String(resetNow.getDate()).padStart(2, "0");
+    setMealDate(`${year}-${month}-${day}`);
+    
     const hours = String(resetNow.getHours()).padStart(2, "0");
     const minutes = String(resetNow.getMinutes()).padStart(2, "0");
     setMealTime(`${hours}:${minutes}`);
@@ -314,6 +332,11 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
     setDraftMealName("Bữa ăn dinh dưỡng");
     setDraftItems([]);
     const resetNow = new Date();
+    const year = resetNow.getFullYear();
+    const month = String(resetNow.getMonth() + 1).padStart(2, "0");
+    const day = String(resetNow.getDate()).padStart(2, "0");
+    setMealDate(`${year}-${month}-${day}`);
+    
     const hours = String(resetNow.getHours()).padStart(2, "0");
     const minutes = String(resetNow.getMinutes()).padStart(2, "0");
     setMealTime(`${hours}:${minutes}`);
@@ -332,12 +355,6 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
   };
 
   const totalCalculated = getTotals();
-
-  // Get current date representation in Vietnamese format
-  const todayVietnamese = React.useMemo(() => {
-    const d = new Date();
-    return `Hôm nay (Ngày ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()})`;
-  }, []);
 
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-full flex flex-col justify-between">
@@ -358,18 +375,25 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
           </div>
           
-          {/* Locked to current Date, interactive Hour/Minute selection */}
+          {/* Interactive Date & Hour/Minute selection on the same row */}
           <div className="flex items-center gap-2.5 shrink-0 bg-slate-50 border border-slate-200/60 px-4 py-2.5 rounded-2xl">
             <Clock className="w-4 h-4 text-emerald-600 shrink-0" />
-            <div className="flex flex-col text-left">
-              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                {todayVietnamese}
-              </span>
-              <div className="flex items-center gap-1 mt-0.5">
-                <span className="text-xs font-medium text-slate-500">Giờ ăn:</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium text-slate-500">Ngày:</span>
+                <input
+                  type="date"
+                  className="bg-transparent text-xs font-bold text-slate-800 focus:outline-hidden border-none p-0 cursor-pointer w-[110px]"
+                  value={mealDate}
+                  onChange={(e) => setMealDate(e.target.value)}
+                />
+              </div>
+              <div className="w-px h-4 bg-slate-200"></div>
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium text-slate-500">Giờ:</span>
                 <input
                   type="time"
-                  className="bg-transparent text-xs font-bold text-slate-800 focus:outline-hidden border-none p-0 cursor-pointer w-24"
+                  className="bg-transparent text-xs font-bold text-slate-800 focus:outline-hidden border-none p-0 cursor-pointer w-[60px]"
                   value={mealTime}
                   onChange={(e) => setMealTime(e.target.value)}
                 />
@@ -525,186 +549,193 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
           </div>
         </div>
 
-        {/* Current Foods in draft table */}
-        <div className="space-y-3 mb-6 flex-1">
-          <span className="text-xs font-bold text-slate-400 uppercase block tracking-wider">
-            Thành phần trong bữa ăn ({draftItems.length}) (Sửa trực tiếp các dòng dưới đây):
-          </span>
+        {/* Ingredients and Totals on the same row */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch mb-6">
+          {/* Current Foods in draft table */}
+          <div className="lg:col-span-8 flex flex-col justify-between">
+            <div className="space-y-3 flex-1">
+              <span className="text-xs font-bold text-slate-400 uppercase block tracking-wider">
+                Thành phần trong bữa ăn ({draftItems.length}) (Sửa trực tiếp các dòng dưới đây):
+              </span>
 
-          {draftItems.length === 0 ? (
-            <div className="text-center py-10 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center p-4">
-              <Calendar className="w-8 h-8 text-slate-300 mb-2" />
-              <p className="text-xs text-slate-500 font-medium">Bữa ăn này chưa có thực phẩm nào.</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">Vui lòng nhập tìm thực phẩm ở bảng trên để thêm vào.</p>
+              {draftItems.length === 0 ? (
+                <div className="text-center py-10 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center p-4">
+                  <Calendar className="w-8 h-8 text-slate-300 mb-2" />
+                  <p className="text-xs text-slate-500 font-medium">Bữa ăn này chưa có thực phẩm nào.</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Vui lòng nhập tìm thực phẩm ở bảng trên để thêm vào.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto border border-slate-100 rounded-2xl">
+                  <table className="w-full text-left text-xs text-slate-600">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold">
+                        <th className="py-3 px-3 w-1/4">Tên thực phẩm</th>
+                        <th className="py-3 px-2 w-1/6">Lượng</th>
+                        <th className="py-3 px-1 w-1/12 text-center text-amber-500">Kcal</th>
+                        <th className="py-3 px-1 w-1/12 text-center text-emerald-600">🥩 Đạm</th>
+                        <th className="py-3 px-1 w-1/12 text-center text-sky-600">🍚 Carb</th>
+                        <th className="py-3 px-1 w-1/12 text-center text-rose-500">🧈 Fat</th>
+                        <th className="py-3 pr-3 w-[50px]"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {draftItems.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/50 transition-all">
+                          {/* Name with inline suggestions row */}
+                          <td className="py-2.5 px-3 relative">
+                            <input
+                              type="text"
+                              value={item.foodName}
+                              onChange={(e) => {
+                                handleUpdateItemField(idx, "foodName", e.target.value);
+                                setActiveRowIdx(idx);
+                                setShowRowSuggestions(true);
+                              }}
+                              onFocus={() => {
+                                setActiveRowIdx(idx);
+                                setShowRowSuggestions(true);
+                              }}
+                              onBlur={() => {
+                                setTimeout(() => {
+                                  setShowRowSuggestions(false);
+                                }, 200);
+                              }}
+                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-700 font-bold transition-all"
+                            />
+                            
+                            {/* Auto suggestions dropdown for this table row */}
+                            {showRowSuggestions && activeRowIdx === idx && getRowFilteredFoods(item.foodName).length > 0 && (
+                              <div className="absolute left-3 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-40 overflow-y-auto w-64 divide-y divide-slate-100 p-1">
+                                {getRowFilteredFoods(item.foodName).map((food) => (
+                                  <button
+                                    key={food.id}
+                                    type="button"
+                                    onMouseDown={() => {
+                                      handleSelectCustomFoodForTableRow(idx, food);
+                                    }}
+                                    className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-50 hover:text-emerald-800 transition-colors text-xs flex justify-between items-center rounded-lg"
+                                  >
+                                    <div className="min-w-0 flex-1">
+                                      <div className="font-bold text-slate-700 truncate">{food.name}</div>
+                                      <div className="text-[10px] text-slate-400">Suất: {food.servingSize}</div>
+                                    </div>
+                                    <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded-full text-slate-500 font-semibold shrink-0 ml-1">
+                                      {food.calories} kcal
+                                    </span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                          
+                          {/* Quantity change handles proportion automatic calculations */}
+                          <td className="py-2.5 px-2">
+                            <input
+                              type="text"
+                              value={item.quantity}
+                              onChange={(e) => handleUpdateItemField(idx, "quantity", e.target.value)}
+                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-600 transition-all font-medium"
+                            />
+                          </td>
+
+                          {/* Cal */}
+                          <td className="py-2.5 px-1 text-center font-bold">
+                            <input
+                              type="number"
+                              value={item.calories}
+                              onChange={(e) => handleUpdateItemField(idx, "calories", e.target.value)}
+                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-amber-600 font-bold"
+                              min="0"
+                            />
+                          </td>
+
+                          {/* Protein */}
+                          <td className="py-2.5 px-1 text-center font-semibold">
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={item.protein}
+                              onChange={(e) => handleUpdateItemField(idx, "protein", e.target.value)}
+                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-emerald-600 font-semibold"
+                              min="0"
+                            />
+                          </td>
+
+                          {/* Carb */}
+                          <td className="py-2.5 px-1 text-center font-semibold">
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={item.carb}
+                              onChange={(e) => handleUpdateItemField(idx, "carb", e.target.value)}
+                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-sky-600 font-semibold"
+                              min="0"
+                            />
+                          </td>
+
+                          {/* Fat */}
+                          <td className="py-2.5 px-1 text-center font-semibold">
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={item.fat}
+                              onChange={(e) => handleUpdateItemField(idx, "fat", e.target.value)}
+                              className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-rose-500 font-semibold"
+                              min="0"
+                            />
+                          </td>
+
+                          {/* Row Delete button */}
+                          <td className="py-2.5 pr-3 text-right">
+                            <button
+                              onClick={() => handleDeleteDraftItem(idx)}
+                              className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
+                              title="Xóa thực phẩm"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="overflow-x-auto border border-slate-100 rounded-2xl">
-              <table className="w-full text-left text-xs text-slate-600">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold">
-                    <th className="py-3 px-3 w-1/4">Tên thực phẩm</th>
-                    <th className="py-3 px-2 w-1/6">Lượng</th>
-                    <th className="py-3 px-1 w-1/12 text-center text-amber-500">Kcal</th>
-                    <th className="py-3 px-1 w-1/12 text-center text-emerald-600">🥩 Đạm</th>
-                    <th className="py-3 px-1 w-1/12 text-center text-sky-600">🍚 Carb</th>
-                    <th className="py-3 px-1 w-1/12 text-center text-rose-500">🧈 Fat</th>
-                    <th className="py-3 pr-3 w-[50px]"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {draftItems.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/50 transition-all">
-                      {/* Name with inline suggestions row */}
-                      <td className="py-2.5 px-3 relative">
-                        <input
-                          type="text"
-                          value={item.foodName}
-                          onChange={(e) => {
-                            handleUpdateItemField(idx, "foodName", e.target.value);
-                            setActiveRowIdx(idx);
-                            setShowRowSuggestions(true);
-                          }}
-                          onFocus={() => {
-                            setActiveRowIdx(idx);
-                            setShowRowSuggestions(true);
-                          }}
-                          onBlur={() => {
-                            setTimeout(() => {
-                              setShowRowSuggestions(false);
-                            }, 200);
-                          }}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-700 font-bold transition-all"
-                        />
-                        
-                        {/* Auto suggestions dropdown for this table row */}
-                        {showRowSuggestions && activeRowIdx === idx && getRowFilteredFoods(item.foodName).length > 0 && (
-                          <div className="absolute left-3 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-40 overflow-y-auto w-64 divide-y divide-slate-100 p-1">
-                            {getRowFilteredFoods(item.foodName).map((food) => (
-                              <button
-                                key={food.id}
-                                type="button"
-                                onMouseDown={() => {
-                                  handleSelectCustomFoodForTableRow(idx, food);
-                                }}
-                                className="w-full text-left px-2.5 py-1.5 hover:bg-emerald-50 hover:text-emerald-800 transition-colors text-xs flex justify-between items-center rounded-lg"
-                              >
-                                <div className="min-w-0 flex-1">
-                                  <div className="font-bold text-slate-700 truncate">{food.name}</div>
-                                  <div className="text-[10px] text-slate-400">Suất: {food.servingSize}</div>
-                                </div>
-                                <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded-full text-slate-500 font-semibold shrink-0 ml-1">
-                                  {food.calories} kcal
-                                </span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </td>
-                      
-                      {/* Quantity change handles proportion automatic calculations */}
-                      <td className="py-2.5 px-2">
-                        <input
-                          type="text"
-                          value={item.quantity}
-                          onChange={(e) => handleUpdateItemField(idx, "quantity", e.target.value)}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-1 w-full text-slate-600 transition-all font-medium"
-                        />
-                      </td>
+          </div>
 
-                      {/* Cal */}
-                      <td className="py-2.5 px-1 text-center font-bold">
-                        <input
-                          type="number"
-                          value={item.calories}
-                          onChange={(e) => handleUpdateItemField(idx, "calories", e.target.value)}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-amber-600 font-bold"
-                          min="0"
-                        />
-                      </td>
-
-                      {/* Protein */}
-                      <td className="py-2.5 px-1 text-center font-semibold">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={item.protein}
-                          onChange={(e) => handleUpdateItemField(idx, "protein", e.target.value)}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-emerald-600 font-semibold"
-                          min="0"
-                        />
-                      </td>
-
-                      {/* Carb */}
-                      <td className="py-2.5 px-1 text-center font-semibold">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={item.carb}
-                          onChange={(e) => handleUpdateItemField(idx, "carb", e.target.value)}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-sky-600 font-semibold"
-                          min="0"
-                        />
-                      </td>
-
-                      {/* Fat */}
-                      <td className="py-2.5 px-1 text-center font-semibold">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={item.fat}
-                          onChange={(e) => handleUpdateItemField(idx, "fat", e.target.value)}
-                          className="bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-400 focus:bg-white rounded-lg p-1 w-full text-center text-rose-500 font-semibold"
-                          min="0"
-                        />
-                      </td>
-
-                      {/* Row Delete button */}
-                      <td className="py-2.5 pr-3 text-right">
-                        <button
-                          onClick={() => handleDeleteDraftItem(idx)}
-                          className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
-                          title="Xóa thực phẩm"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Sum total preview panel */}
-        <div className="bg-slate-50 rounded-2xl p-4.5 border border-slate-100 my-6">
-          <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase block mb-2">
-            📊 Tổng cộng bữa ăn tạm tính:
-          </span>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-slate-700">
-            <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
-              <p className="text-[10px] text-slate-400 font-bold uppercase">CALORIES</p>
-              <p className="text-base font-extrabold text-amber-500 mt-0.5">
-                {Math.round(totalCalculated.calories)} kcal
-              </p>
-            </div>
-            <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
-              <p className="text-[10px] text-emerald-600 font-bold uppercase">🥩 PROTEIN</p>
-              <p className="text-base font-extrabold text-emerald-600 mt-0.5">
-                {Math.round(totalCalculated.protein * 10) / 10}g
-              </p>
-            </div>
-            <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
-              <p className="text-[10px] text-sky-600 font-bold uppercase">🍚 CARB</p>
-              <p className="text-base font-extrabold text-sky-600 mt-0.5">
-                {Math.round(totalCalculated.carb * 10) / 10}g
-              </p>
-            </div>
-            <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
-              <p className="text-[10px] text-rose-500 font-bold uppercase">🧈 FAT</p>
-              <p className="text-base font-extrabold text-rose-500 mt-0.5">
-                {Math.round(totalCalculated.fat * 10) / 10}g
-              </p>
+          {/* Sum total preview panel */}
+          <div className="lg:col-span-4 bg-slate-50 rounded-3xl p-5 border border-slate-100 flex flex-col justify-between">
+            <div>
+              <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase block mb-4 flex items-center gap-1.5">
+                <span>📊 Tổng cộng bữa ăn tạm tính:</span>
+              </span>
+              <div className="grid grid-cols-2 gap-3 text-slate-700">
+                <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
+                  <p className="text-[9px] text-slate-400 font-bold uppercase">CALORIES</p>
+                  <p className="text-sm font-extrabold text-amber-500 mt-0.5">
+                    {Math.round(totalCalculated.calories)} kcal
+                  </p>
+                </div>
+                <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
+                  <p className="text-[9px] text-emerald-600 font-bold uppercase">🥩 PROTEIN</p>
+                  <p className="text-sm font-extrabold text-emerald-600 mt-0.5">
+                    {Math.round(totalCalculated.protein * 10) / 10}g
+                  </p>
+                </div>
+                <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
+                  <p className="text-[9px] text-sky-600 font-bold uppercase">🍚 CARB</p>
+                  <p className="text-sm font-extrabold text-sky-600 mt-0.5">
+                    {Math.round(totalCalculated.carb * 10) / 10}g
+                  </p>
+                </div>
+                <div className="bg-white border border-slate-100 p-2.5 rounded-xl text-center shadow-2xs">
+                  <p className="text-[9px] text-rose-500 font-bold uppercase">🧈 FAT</p>
+                  <p className="text-sm font-extrabold text-rose-500 mt-0.5">
+                    {Math.round(totalCalculated.fat * 10) / 10}g
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

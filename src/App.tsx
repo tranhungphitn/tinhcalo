@@ -763,131 +763,134 @@ export default function App() {
           </div>
         </section>
 
-        {/* FULL WIDTH FUNCTIONAL AREA (MEAL LOGGER - AI POWERED & MANUAL) */}
-        <div className="w-full mb-8" id="meal_logger_wrapper">
-          <MealLogger onSaveMeal={handleAddMeal} meals={meals} customFoods={customFoods} />
-        </div>
-
-        {/* LIST OF TODAY'S RECORDED FOODS */}
-        <div className="w-full bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-8" id="today_meals_timeline">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-            <div>
-              <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                <Utensils className="w-4.5 h-4.5 text-emerald-500 animate-pulse" />
-                Thực phẩm / Bữa ăn đã ăn hôm nay
-              </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Danh sách thực phẩm bạn đã nhập dinh dưỡng trong ngày hôm nay
-              </p>
-            </div>
-            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
-              Tổng cộng: {todayMeals.length} bữa ăn
-            </span>
+        {/* SIDE-BY-SIDE FUNCTIONAL AREA & TODAY'S RECORDED FOODS */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch mb-8">
+          {/* MEAL LOGGER CONTAINER */}
+          <div id="meal_logger_wrapper" className="h-full">
+            <MealLogger onSaveMeal={handleAddMeal} meals={meals} customFoods={customFoods} />
           </div>
 
-          {todayMeals.length === 0 ? (
-            <div className="text-center py-10 text-slate-400 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-              <Apple className="w-8 h-8 text-slate-300 mx-auto mb-2 animate-bounce" />
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Chưa ăn món gì hôm nay</p>
-              <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                Bữa ăn mới nhất sẽ được liệt kê ở đây khi bạn thêm bằng AI hoặc thêm thủ công phía trên.
-              </p>
+          {/* LIST OF TODAY'S RECORDED FOODS */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-full flex flex-col" id="today_meals_timeline">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                  <Utensils className="w-4.5 h-4.5 text-emerald-500 animate-pulse" />
+                  Bữa ăn hôm nay
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Danh sách thực phẩm bạn đã nhập dinh dưỡng trong ngày hôm nay
+                </p>
+              </div>
+              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                Tổng cộng: {todayMeals.length} bữa ăn
+              </span>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {todayMeals.map((meal) => {
-                const isExpanded = expandedMealId === meal.id;
-                const mealTime = new Date(meal.timestamp).toLocaleTimeString("vi-VN", {
-                  hour: "2-digit",
-                  minute: "2-digit"
-                });
 
-                return (
-                  <div
-                    key={meal.id}
-                    className={`bg-white border rounded-2xl transition-all duration-350 overflow-hidden ${
-                      isExpanded ? "border-emerald-300 shadow-sm" : "border-slate-150 hover:border-slate-250"
-                    }`}
-                  >
-                    {/* Header preview */}
+            {todayMeals.length === 0 ? (
+              <div className="text-center py-10 text-slate-400 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 flex-1 flex flex-col items-center justify-center">
+                <Apple className="w-8 h-8 text-slate-300 mx-auto mb-2 animate-bounce" />
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Chưa ăn món gì hôm nay</p>
+                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                  Bữa ăn mới nhất sẽ được liệt kê ở đây khi bạn thêm bằng AI hoặc thêm thủ công phía trên.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3 overflow-y-auto max-h-[600px] pr-1 scrollbar-thin flex-1">
+                {todayMeals.map((meal) => {
+                  const isExpanded = expandedMealId === meal.id;
+                  const mealTime = new Date(meal.timestamp).toLocaleTimeString("vi-VN", {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  });
+
+                  return (
                     <div
-                      onClick={() => toggleExpandMeal(meal.id)}
-                      className="p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-slate-50/30 transition-all font-medium"
+                      key={meal.id}
+                      className={`bg-white border rounded-2xl transition-all duration-350 overflow-hidden ${
+                        isExpanded ? "border-emerald-300 shadow-sm" : "border-slate-150 hover:border-slate-250"
+                      }`}
                     >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-extrabold text-slate-400 shrink-0 uppercase tracking-wider">
-                            ⏰ {mealTime}
+                      {/* Header preview */}
+                      <div
+                        onClick={() => toggleExpandMeal(meal.id)}
+                        className="p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-slate-50/30 transition-all font-medium"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-extrabold text-slate-400 shrink-0 uppercase tracking-wider">
+                              ⏰ {mealTime}
+                            </span>
+                            <h4 className="font-bold text-slate-800 text-xs sm:text-sm truncate pr-2">
+                              {meal.mealName}
+                            </h4>
+                          </div>
+                          {/* Nutrition pill summaries */}
+                          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-[11px] font-semibold text-slate-400">
+                            <span className="text-amber-500 font-bold">🔥 {meal.total.calories} kcal</span>
+                            <span>🥩 {meal.total.protein}g đạm</span>
+                            <span>🍚 {meal.total.carb}g carb</span>
+                            <span>🧈 {meal.total.fat}g béo</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteMeal(meal.id);
+                            }}
+                            className="p-1.5 hover:text-rose-600 hover:bg-rose-50 text-slate-300 rounded-lg transition-all animate-fade-in"
+                            title="Xóa bữa ăn"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                          <div className="text-slate-400 hover:text-slate-600 p-0.5 rounded-sm">
+                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Breakdown table */}
+                      {isExpanded && (
+                        <div className="bg-slate-50/50 p-4 border-t border-slate-100 transition-all text-xs">
+                          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2.5">
+                            Chi tiết thành phần bữa ăn:
                           </span>
-                          <h4 className="font-bold text-slate-800 text-xs sm:text-sm truncate pr-2">
-                            {meal.mealName}
-                          </h4>
-                        </div>
-                        {/* Nutrition pill summaries */}
-                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-[11px] font-semibold text-slate-400">
-                          <span className="text-amber-500 font-bold">🔥 {meal.total.calories} kcal</span>
-                          <span>🥩 {meal.total.protein}g đạm</span>
-                          <span>🍚 {meal.total.carb}g carb</span>
-                          <span>🧈 {meal.total.fat}g béo</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteMeal(meal.id);
-                          }}
-                          className="p-1.5 hover:text-rose-600 hover:bg-rose-50 text-slate-300 rounded-lg transition-all animate-fade-in"
-                          title="Xóa bữa ăn"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                        <div className="text-slate-400 hover:text-slate-600 p-0.5 rounded-sm">
-                          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Breakdown table */}
-                    {isExpanded && (
-                      <div className="bg-slate-50/50 p-4 border-t border-slate-100 transition-all text-xs">
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2.5">
-                          Chi tiết thành phần bữa ăn:
-                        </span>
-                        <div className="bg-white rounded-xl border border-slate-150 overflow-x-auto shadow-2xs">
-                          <table className="w-full text-left min-w-[500px]">
-                            <thead>
-                              <tr className="bg-slate-100 text-[10px] text-slate-500 font-bold border-b border-slate-200">
-                                <th className="py-2 px-3">Tên thực phẩm</th>
-                                <th className="py-2 px-2 text-center">Khối lượng</th>
-                                <th className="py-2 px-2 text-center text-amber-600">Calo</th>
-                                <th className="py-2 px-2 text-center text-emerald-600">🥩 Đạm</th>
-                                <th className="py-2 px-2 text-center text-sky-600">🍚 Carb</th>
-                                <th className="py-2 px-2 text-center text-rose-500">🧈 Béo</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 text-[11px] text-slate-600">
-                              {meal.items.map((item, keyIdx) => (
-                                <tr key={keyIdx}>
-                                  <td className="py-2 px-3 font-semibold text-slate-700">{item.foodName}</td>
-                                  <td className="py-2 px-2 text-center font-medium text-slate-500">{item.quantity}</td>
-                                  <td className="py-2 px-2 text-center font-bold text-amber-600">{item.calories}</td>
-                                  <td className="py-2 px-2 text-center font-semibold text-emerald-600">{item.protein}g</td>
-                                  <td className="py-2 px-2 text-center font-semibold text-sky-600">{item.carb}g</td>
-                                  <td className="py-2 px-2 text-center font-semibold text-rose-500">{item.fat}g</td>
+                          <div className="bg-white rounded-xl border border-slate-150 overflow-x-auto shadow-2xs">
+                            <table className="w-full text-left min-w-[500px]">
+                              <thead>
+                                <tr className="bg-slate-100 text-[10px] text-slate-500 font-bold border-b border-slate-200">
+                                  <th className="py-2 px-3">Tên thực phẩm</th>
+                                  <th className="py-2 px-2 text-center">Khối lượng</th>
+                                  <th className="py-2 px-2 text-center text-amber-600">Calo</th>
+                                  <th className="py-2 px-2 text-center text-emerald-600">🥩 Đạm</th>
+                                  <th className="py-2 px-2 text-center text-sky-600">🍚 Carb</th>
+                                  <th className="py-2 px-2 text-center text-rose-500">🧈 Béo</th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100 text-[11px] text-slate-600">
+                                {meal.items.map((item, keyIdx) => (
+                                  <tr key={keyIdx}>
+                                    <td className="py-2 px-3 font-semibold text-slate-700">{item.foodName}</td>
+                                    <td className="py-2 px-2 text-center font-medium text-slate-500">{item.quantity}</td>
+                                    <td className="py-2 px-2 text-center font-bold text-amber-600">{item.calories}</td>
+                                    <td className="py-2 px-2 text-center font-semibold text-emerald-600">{item.protein}g</td>
+                                    <td className="py-2 px-2 text-center font-semibold text-sky-600">{item.carb}g</td>
+                                    <td className="py-2 px-2 text-center font-semibold text-rose-500">{item.fat}g</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </>
     )}

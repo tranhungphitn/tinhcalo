@@ -2,10 +2,18 @@ import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { Meal, DailyGoal, Recipe, CustomFood } from "./types";
 import { DEFAULT_GOAL, getSeededMeals } from "./utils/dummyData";
-import MetricCircle from "./components/MetricCircle";
-import AnalyticsCharts from "./components/AnalyticsCharts";
 import MealLogger from "./components/MealLogger";
-import CustomFoodsManager from "./components/CustomFoodsManager";
+import MetricCircle from "./components/MetricCircle";
+
+const AnalyticsCharts = React.lazy(() => import("./components/AnalyticsCharts"));
+const CustomFoodsManager = React.lazy(() => import("./components/CustomFoodsManager"));
+
+const TabLoadingPlaceholder = () => (
+  <div className="flex flex-col items-center justify-center p-12 space-y-3">
+    <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+    <p className="text-xs font-medium text-slate-400">Đang tải...</p>
+  </div>
+);
 import {
   Sparkles,
   Settings2,
@@ -896,7 +904,9 @@ export default function App() {
       <div className="space-y-8 w-full animate-fade-in" id="history_tab_content">
         {/* ANALYTICS CHARTS COMPONENT - FULL WIDTH */}
         <div className="w-full" id="analytics_charts_wrapper">
-          <AnalyticsCharts meals={meals} dailyGoal={dailyGoal} />
+          <React.Suspense fallback={<TabLoadingPlaceholder />}>
+            <AnalyticsCharts meals={meals} dailyGoal={dailyGoal} />
+          </React.Suspense>
         </div>
 
         {/* FULL WIDTH HISTORY PORTLET */}
@@ -1124,12 +1134,14 @@ export default function App() {
       )}
 
         {activeMainTab === "customFoods" && currentUser?.username !== "tuyen" && (
-          <CustomFoodsManager 
-            customFoods={customFoods} 
-            onUpdateCustomFoods={handleUpdateCustomFoods} 
-            isAdmin={true} 
-            username={currentUser?.username || "default"}
-          />
+          <React.Suspense fallback={<TabLoadingPlaceholder />}>
+            <CustomFoodsManager 
+              customFoods={customFoods} 
+              onUpdateCustomFoods={handleUpdateCustomFoods} 
+              isAdmin={true} 
+              username={currentUser?.username || "default"}
+            />
+          </React.Suspense>
         )}
       </main>
 

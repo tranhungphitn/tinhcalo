@@ -166,7 +166,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
   };
 
   // Sum drafted values
-  const getTotals = () => {
+  const totalCalculated = React.useMemo(() => {
     return draftItems.reduce(
       (acc, item) => {
         acc.calories += Number(item.calories) || 0;
@@ -177,7 +177,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
       },
       { calories: 0, protein: 0, carb: 0, fat: 0 }
     );
-  };
+  }, [draftItems]);
 
   // Modify draft items individually
   const handleUpdateItemField = (index: number, field: keyof FoodItem, value: any) => {
@@ -270,7 +270,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
       return;
     }
 
-    const calculatedTotals = getTotals();
+    const calculatedTotals = totalCalculated;
 
     // Reconstruct ISO timestamp with selected Date, hours and minutes from state
     const now = new Date();
@@ -353,8 +353,6 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
     setManualBaseCarb(0);
     setManualBaseFat(0);
   };
-
-  const totalCalculated = getTotals();
 
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-full flex flex-col justify-between">

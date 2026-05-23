@@ -312,11 +312,42 @@ Nhiệm vụ đặc biệt quan trọng (ƯU TIÊN TUYỆT ĐỐI SỐ 1 - TRONG
   }
 });
 
-// Endpoint: Lấy danh sách Dữ liệu Thức Ăn cá nhân
+// Endpoint: Lấy danh sách Dữ liệu Thức Ăn cá nhân (hỗ trợ phân trang và tìm kiếm tùy chọn)
 app.get("/api/custom-foods", async (req, res) => {
   try {
     const username = (req.headers["x-username"] as string) || "default";
-    const list = await readCustomFoodsFromFile(username);
+    let list = await readCustomFoodsFromFile(username);
+    
+    // Check if query params exist for pagination
+    const pageVal = req.query.page;
+    const limitVal = req.query.limit;
+    const searchVal = req.query.search;
+
+    if (pageVal !== undefined && limitVal !== undefined) {
+      const page = parseInt(pageVal as string, 10) || 1;
+      const limit = parseInt(limitVal as string, 10) || 10;
+      
+      if (searchVal) {
+        const query = (searchVal as string).toLowerCase().trim();
+        list = list.filter((f: any) =>
+          (f.name && f.name.toLowerCase().includes(query)) ||
+          (f.servingSize && f.servingSize.toLowerCase().includes(query))
+        );
+      }
+      
+      const totalItems = list.length;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+      const startIndex = (page - 1) * limit;
+      const paginatedList = list.slice(startIndex, startIndex + limit);
+      
+      return res.json({
+        foods: paginatedList,
+        totalItems,
+        totalPages,
+        currentPage: page
+      });
+    }
+    
     return res.json(list);
   } catch (error: any) {
     return res.status(500).json({ error: error.message || "Không thể đọc danh sách thực phẩm cá nhân." });

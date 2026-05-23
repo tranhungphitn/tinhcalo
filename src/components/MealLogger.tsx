@@ -325,9 +325,9 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
 
         {/* Adding Form Section */}
         <div className="bg-slate-50/70 border border-slate-200/40 rounded-2xl p-4 mb-6">
-          <div className="grid grid-cols-2 md:grid-cols-[repeat(19,minmax(0,1fr))] gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-[5.5fr_2.5fr_1.8fr_1.3fr_1.3fr_1.3fr_1.3fr] gap-2">
             {/* Food Name Search box */}
-            <div className="col-span-2 md:col-span-4 relative">
+            <div className="col-span-2 md:col-span-1 relative">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">
                 Tên thực phẩm
               </label>
@@ -376,7 +376,7 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Serving Size quantity */}
-            <div className="col-span-1 md:col-span-2">
+            <div className="col-span-1 md:col-span-1">
               <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">
                 Lượng
               </label>
@@ -390,59 +390,43 @@ export default function MealLogger({ onSaveMeal, meals = [], customFoods = [] }:
             </div>
 
             {/* Calories count */}
-            <div className="col-span-1 md:col-span-3">
-              <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-amber-500">
+            <div className="col-span-1 md:col-span-1">
+              <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-amber-500 text-center">
                 Kcal
               </label>
-              <input
-                type="text"
-                readOnly
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-1.5 py-2.5 font-bold text-amber-600 text-center cursor-not-allowed select-none"
-                value={manualCal}
-                placeholder="0"
-              />
+              <div className="flex items-center justify-center h-[38px] text-xs font-bold text-amber-600 bg-slate-50 border border-slate-200/80 rounded-xl select-none">
+                {manualCal || "0"}
+              </div>
             </div>
 
             {/* Protein count */}
-            <div className="col-span-1 md:col-span-3">
-              <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-emerald-600">
+            <div className="col-span-1 md:col-span-1">
+              <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-emerald-600 text-center">
                 🥩 Đạm
               </label>
-              <input
-                type="text"
-                readOnly
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-1.5 py-2.5 font-semibold text-emerald-600 text-center cursor-not-allowed select-none"
-                value={manualProt !== "" ? `${manualProt}g` : ""}
-                placeholder="0.0g"
-              />
+              <div className="flex items-center justify-center h-[38px] text-xs font-semibold text-emerald-600 bg-slate-50 border border-slate-200/80 rounded-xl select-none">
+                {manualProt !== "" ? `${manualProt}g` : "0g"}
+              </div>
             </div>
 
             {/* Carb count */}
-            <div className="col-span-1 md:col-span-3">
-              <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-sky-600">
+            <div className="col-span-1 md:col-span-1">
+              <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-sky-600 text-center">
                 🍚 Carb
               </label>
-              <input
-                type="text"
-                readOnly
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-1.5 py-2.5 font-semibold text-sky-600 text-center cursor-not-allowed select-none"
-                value={manualCarb !== "" ? `${manualCarb}g` : ""}
-                placeholder="0.0g"
-              />
+              <div className="flex items-center justify-center h-[38px] text-xs font-semibold text-sky-600 bg-slate-50 border border-slate-200/80 rounded-xl select-none">
+                {manualCarb !== "" ? `${manualCarb}g` : "0g"}
+              </div>
             </div>
 
             {/* Fat count */}
-            <div className="col-span-1 md:col-span-3">
-              <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-rose-500">
+            <div className="col-span-1 md:col-span-1">
+              <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1 text-rose-500 text-center">
                 🧈 Béo
               </label>
-              <input
-                type="text"
-                readOnly
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-1.5 py-2.5 font-semibold text-rose-500 text-center cursor-not-allowed select-none"
-                value={manualFat !== "" ? `${manualFat}g` : ""}
-                placeholder="0.0g"
-              />
+              <div className="flex items-center justify-center h-[38px] text-xs font-semibold text-rose-500 bg-slate-50 border border-slate-200/80 rounded-xl select-none">
+                {manualFat !== "" ? `${manualFat}g` : "0g"}
+              </div>
             </div>
 
             {/* Add button aligned on the same row */}
